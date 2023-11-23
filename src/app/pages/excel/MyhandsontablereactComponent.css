@@ -1,0 +1,17 @@
+/* td.custom-cell {
+  color: #fff;
+  background-color: #37bc6c;
+} */
+/* .custom-table thead th:nth-child(even),
+.custom-table tbody tr:nth-child(odd) th {
+  background-color: #37bc6c;
+} */
+.fade-in {
+    opacity: 1;
+    transition: opacity 1s;
+  }
+  
+  .fade-out {
+    opacity: 0;
+    transition: opacity 1s;
+  }
