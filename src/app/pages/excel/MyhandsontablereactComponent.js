@@ -16,6 +16,7 @@ const MyhandsontablereactComponent = () => {
   const [lastDate, setLastDate] = useState()
 
   const dateHandson = useSelector((state) => state.dateHandson)
+  // const dateHandson = '2023-10-26'
   const hotRef = useRef(null)
   //   const [countTableData, setCountTableData] = useState()
 
@@ -26,7 +27,7 @@ const MyhandsontablereactComponent = () => {
   // Iterate through the array and sum the values in the hmDriver property
   for (let i = 0; i < tableData.length; i++) {
     if (tableData[i].hmDriver !== null) {
-      sumTableData += parseInt(tableData[i].hmDriver)
+      sumTableData += Number(tableData[i].hmDriver)
     }
   }
   useEffect(() => {
@@ -59,11 +60,15 @@ const MyhandsontablereactComponent = () => {
     const data = {data: hot.getData()}
 
     axios
-      .post(`https://mandiriservices.biz.id/optbehav/excel/create/${dateHandson.toString()}`, data, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      .post(
+        `https://mandiriservices.biz.id/optbehav/excel/create/${dateHandson.toString()}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
       .then((response) => {
         setSaveSukses(true)
         setTimeout(() => {
