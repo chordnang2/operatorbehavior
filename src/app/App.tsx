@@ -5,29 +5,29 @@ import {LayoutProvider, LayoutSplashScreen} from '../_metronic/layout/core'
 import {MasterInit} from '../_metronic/layout/MasterInit'
 import {AuthInit} from './modules/auth'
 import {ThemeModeProvider} from '../_metronic/partials'
-import {Plugins} from '@capacitor/core'
-import {CapacitorUpdater} from '@capgo/capacitor-updater'
-CapacitorUpdater.notifyAppReady()
+// import {Plugins} from '@capacitor/core'
+// import {CapacitorUpdater} from '@capgo/capacitor-updater'
+// CapacitorUpdater.notifyAppReady()
 
 const App = () => {
   
-  const {Device, Modals} = Plugins
+  // const {Device, Modals} = Plugins
   // const [state, setState] = useState(null);
 
-  async function showDeviceInfo() {
-    try {
-      let info = await Device.getInfo()
-      await Modals.alert({
-        title: 'Info',
-        message: `UUID: ${info.uuid}; Model: ${info.model}`,
-      })
-    } catch (error) {
-      console.error('Error fetching device info:', error)
-    }
-  }
-  useEffect(() => {
-    showDeviceInfo()
-  }, [])
+  // async function showDeviceInfo() {
+  //   try {
+  //     let info = await Device.getInfo()
+  //     await Modals.alert({
+  //       title: 'Info',
+  //       message: `UUID: ${info.uuid}; Model: ${info.model}`,
+  //     })
+  //   } catch (error) {
+  //     console.error('Error fetching device info:', error)
+  //   }
+  // }
+  // useEffect(() => {
+  //   showDeviceInfo()
+  // }, [])
 
   
   

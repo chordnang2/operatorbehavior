@@ -45,6 +45,8 @@ export function AsideMenuMain() {
           </div>
           <AsideMenuItem to='/behavior/excel' icon='switch' title='Excel Upload' />
           <AsideMenuItem to='/behavior/komplain' icon='switch' title='Komplain' />
+          <AsideMenuItem to='/behavior/cek' icon='switch' title='Cek' />
+          <AsideMenuItem to='/behavior/optmaincek' icon='switch' title='Opt Main Cek' />
         </>
       )
     } else {

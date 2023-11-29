@@ -37,10 +37,12 @@ function Komplain() {
   const getKomplain = () => {
     axios
       .get(`https://mandiriservices.biz.id/optbehav/komplain`)
+      // .get(`http://localhost:4000/optbehav/komplain`)
       .then((response) => {
         const formattedData = response.data.data.map((row) => ({
           ...row,
-          timestamp_komplain: moment(row.timestamp_komplain).format('YYYY-MM-DD HH:mm:ss'),
+          timestamp_komplain: moment(row.timestamp_komplain).format('DD/MM/YYYY HH:mm'),
+          tanggalAnomali: moment(row.tanggalAnomali).format('DD MMM YYYY'),
           textAreaValue: '', // Add a new property for text area value
         }))
         setTableData(formattedData)
@@ -101,7 +103,7 @@ function Komplain() {
           <div className='card-header border-0 pt-5'>
             <h3 className='card-title align-items-start flex-column'>
               <span className='card-label fw-bold text-dark'>Data Komplain Operator </span>
-              <span className='text-muted mt-1 fw-semibold fs-7'></span>
+              {/* <span className='text-muted mt-1 fw-semibold fs-7'></span> */}
             </h3>
           </div>
           {loading ? ( // Render a spinner when loading is true
@@ -114,7 +116,7 @@ function Komplain() {
                 <thead>
                   <tr>
                     <th scope='col'>#</th>
-                    <th scope='col'>TIMESTAMP</th>
+                    {/* <th scope='col'>TIMESTAMP</th> */}
                     <th scope='col'>TANGGAL KOMPLAIN</th>
                     <th scope='col'>NIK</th>
                     <th scope='col'>NAMA</th>
@@ -131,7 +133,7 @@ function Komplain() {
                     {currentTableData.map((item, index) => (
                       <tr key={index} className={item.balasan ? 'table-success' : 'table-danger'}>
                         <th scope='row'>{index + 1}</th>
-                        <td>{item.timestamp_komplain}</td>
+                        {/* <td>{item.timestamp_komplain}</td> */}
                         <td>{item.tanggalAnomali}</td>
                         <td>{item.nik_komplain}</td>
                         <td>{item.nama_komplain}</td>
@@ -164,11 +166,15 @@ function Komplain() {
                         </td>
                         <td>
                           {item.foto ? (
-                            <ModalImage
-                              small={toAbsoluteUrl(`/uploadfoto/${item.foto}`)}
-                              large={toAbsoluteUrl(`/uploadfoto/${item.foto}`)}
-                              alt={item.foto}
-                            />
+                            item.foto === 'null' ? (
+                              'tidak ada foto'
+                            ) : (
+                              <ModalImage
+                                small={toAbsoluteUrl(`/uploadfoto/${item.foto}`)}
+                                large={toAbsoluteUrl(`/uploadfoto/${item.foto}`)}
+                                alt={item.foto}
+                              />
+                            )
                           ) : (
                             'tidak ada foto'
                           )}

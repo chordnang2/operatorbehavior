@@ -221,7 +221,9 @@ function Hmtrip() {
       fileInput.value = null // Clear the file input value
     }
   }
-
+  function roundToTwoDecimalPlaces(number) {
+    return Number(number.toFixed(2))
+  }
   return (
     <>
       {loading ? (
@@ -326,11 +328,15 @@ function Hmtrip() {
                             className='fw-bold fs-6 text-gray-800 border-bottom-2 border-gray-200'
                           >
                             <td>{item.lokasi}</td>
-                            <td className={item.sumHm === 0 ? 'text-danger' : ''}>{item.sumHm}</td>
-                            <td className={item.sumRit === 0 ? 'text-danger' : ''}>
-                              {item.sumRit}
+                            <td className={item.sumHm === 0 ? 'text-danger' : ''}>
+                              {roundToTwoDecimalPlaces(item.sumHm)}
                             </td>
-                            <td className={item.sumKm === 0 ? 'text-danger' : ''}>{item.sumKm}</td>
+                            <td className={item.sumRit === 0 ? 'text-danger' : ''}>
+                              {roundToTwoDecimalPlaces(item.sumRit)}
+                            </td>
+                            <td className={item.sumKm === 0 ? 'text-danger' : ''}>
+                              {roundToTwoDecimalPlaces(item.sumKm)}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -339,15 +345,15 @@ function Hmtrip() {
                       <tbody>
                         <tr className='fw-bold fs-6 text-info border-bottom-2'>
                           <td>Total HM</td>
-                          <td>{hmTrip[0].sumHm + hmTrip[1].sumHm}</td>
+                          <td>{roundToTwoDecimalPlaces(hmTrip[0].sumHm + hmTrip[1].sumHm)}</td>
                         </tr>
                         <tr className='fw-bold fs-6 text-info border-bottom-2'>
                           <td>Total Ritasi</td>
-                          <td>{hmTrip[0].sumRit + hmTrip[1].sumRit}</td>
+                          <td>{roundToTwoDecimalPlaces(hmTrip[0].sumRit + hmTrip[1].sumRit)}</td>
                         </tr>
                         <tr className='fw-bold fs-6 text-info border-bottom-2'>
                           <td>Total KM</td>
-                          <td>{hmTrip[0].sumKm + hmTrip[1].sumKm}</td>
+                          <td>{roundToTwoDecimalPlaces(hmTrip[0].sumKm + hmTrip[1].sumKm)}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -368,105 +374,126 @@ function Hmtrip() {
               </div>
             </div>
             <div className='card-body align-items-center w-100 py-8'>
-              <ul className='nav nav-tabs nav-line-tabs nav-line-tabs-2x mb-5 fs-6'>
-                <li className='nav-item'>
-                  <a className='nav-link active' data-bs-toggle='tab' href='#kt_tab_pane_4'>
-                    SENYIUR
-                  </a>
-                </li>
-                <li className='nav-item'>
-                  <a className='nav-link' data-bs-toggle='tab' href='#kt_tab_pane_5'>
-                    MUARA PAHU
-                  </a>
-                </li>
-              </ul>
-              <div className='tab-content' id='myTabContent'>
-                <div className='tab-pane fade show active' id='kt_tab_pane_4' role='tabpanel'>
-                  <div className='table-responsive'>
-                    {tableOptSenyiur &&
-                    tableOptSenyiur.length > 2 &&
-                    tableOptSenyiur.every((item) => item[0].hmDriver === 0) ? (
-                      <Kosong />
-                    ) : (
-                      <table className='table table-light table-striped'>
-                        <thead>
-                          <tr>
-                            <th>Tanggal</th>
-                            <th>HM</th>
-                            <th>Trip</th>
-                            <th>KM</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {tableOptSenyiur.map((item, index) => (
-                            <tr
-                              key={index}
-                              className='fw-bold fs-6 text-gray-800 border-bottom-2 border-gray-200'
+              <div className='table-responsive'>
+                {tableOptSenyiur &&
+                tableOptSenyiur.length > 2 &&
+                tableOptSenyiur.every((item) => item[0].hmDriver === 0) ? (
+                  <Kosong />
+                ) : (
+                  <table className='table table-light table-striped'>
+                    <thead>
+                      <tr>
+                        <th>Tanggal</th>
+                        <th>Lokasi</th>
+                        <th>HM</th>
+                        <th>Trip</th>
+                        <th>KM</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {tableOptSenyiur.map((item, index) => (
+                        <tr
+                          key={index}
+                          className='fw-bold fs-6 text-gray-800 border-bottom-2 border-gray-200'
+                        >
+                          <td>
+                            <div className='p-2'>
+                              {moment(item[0].datePayroll).format('DD/MM/YYYY')}
+                            </div>
+                          </td>
+                          <td>
+                            <div className='p-1'>Senyiur</div>
+                            <div className='p-1'>Muarapahu</div>
+                            <hr></hr>
+                            <div className='p-1'>Total</div>
+                          </td>
+                          <td>
+                            <div className={item[0].hmDriver === 0 ? 'text-danger p-1' : 'p-1'}>
+                              {' '}
+                              {roundToTwoDecimalPlaces(item[0].hmDriver)}
+                            </div>
+                            <div
+                              className={
+                                tableOptMuarapahu[index][0].hmDriver === 0
+                                  ? 'text-danger p-1'
+                                  : 'p-1'
+                              }
                             >
-                              <td>{moment(item[0].datePayroll).format('DD/MM/YYYY')}</td>
-                              <td className={item[0].hmDriver === 0 ? 'text-danger' : ''}>
-                                {item[0].hmDriver}
-                              </td>
-                              <td className={item[0].akumRit === 0 ? 'text-danger' : ''}>
-                                {item[0].akumRit % 1 !== 0
-                                  ? item[0].akumRit.toFixed(2)
-                                  : item[0].akumRit}
-                              </td>
-                              <td className={item[0].kmDriver === 0 ? 'text-danger' : ''}>
-                                {item[0].kmDriver % 1 !== 0
-                                  ? item[0].kmDriver.toFixed(2)
-                                  : item[0].kmDriver}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    )}
-                  </div>
-                </div>
-                <div className='tab-pane fade' id='kt_tab_pane_5' role='tabpanel'>
-                  <div className='table-responsive'>
-                    {tableOptMuarapahu &&
-                    tableOptMuarapahu.length >= 2 &&
-                    tableOptMuarapahu.every((item) => item[0].hmDriver === 0) ? (
-                      <Kosong />
-                    ) : (
-                      <table className='table table-light table-striped'>
-                        <thead>
-                          <tr>
-                            <th>Tanggal</th>
-                            <th>HM</th>
-                            <th>Trip</th>
-                            <th>KM</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {tableOptMuarapahu.map((item, index) => (
-                            <tr
-                              key={index}
-                              className='fw-bold fs-6 text-gray-800 border-bottom-2 border-gray-200'
+                              {roundToTwoDecimalPlaces(tableOptMuarapahu[index][0].hmDriver)}
+                            </div>
+                            <hr></hr>
+                            <div
+                              className={
+                                item[0].hmDriver + tableOptMuarapahu[index][0].hmDriver === 0
+                                  ? 'text-danger p-1'
+                                  : 'p-1'
+                              }
                             >
-                              <td>{moment(item[0].datePayroll).format('DD/MM/YYYY')}</td>
-                              <td className={item[0].hmDriver === 0 ? 'text-danger' : ''}>
-                                {item[0].hmDriver}
-                              </td>
-                              <td className={item[0].akumRit === 0 ? 'text-danger' : ''}>
-                                {item[0].akumRit % 1 !== 0
-                                  ? item[0].akumRit.toFixed(2)
-                                  : item[0].akumRit}
-                              </td>
-                              <td className={item[0].kmDriver === 0 ? 'text-danger' : ''}>
-                                {item[0].kmDriver % 1 !== 0
-                                  ? item[0].kmDriver.toFixed(2)
-                                  : item[0].kmDriver}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    )}
-                  </div>
-                </div>
+                              {roundToTwoDecimalPlaces(
+                                item[0].hmDriver + tableOptMuarapahu[index][0].hmDriver
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            <div className={item[0].akumRit === 0 ? 'text-danger p-1' : 'p-1'}>
+                              {roundToTwoDecimalPlaces(item[0].akumRit)}
+                            </div>
+                            <div
+                              className={
+                                tableOptMuarapahu[index][0].akumRit === 0
+                                  ? 'text-danger p-1'
+                                  : 'p-1'
+                              }
+                            >
+                              {roundToTwoDecimalPlaces(tableOptMuarapahu[index][0].akumRit)}
+                            </div>
+                            <hr></hr>
+                            <div
+                              className={
+                                item[0].akumRit + tableOptMuarapahu[index][0].akumRit === 0
+                                  ? 'text-danger p-1'
+                                  : 'p-1'
+                              }
+                            >
+                              {roundToTwoDecimalPlaces(
+                                item[0].akumRit + tableOptMuarapahu[index][0].akumRit
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            <div className={item[0].kmDriver === 0 ? 'text-danger p-1' : 'p-1'}>
+                              {roundToTwoDecimalPlaces(item[0].kmDriver)}
+                            </div>
+                            <div
+                              className={
+                                tableOptMuarapahu[index][0].kmDriver === 0
+                                  ? 'text-danger p-1'
+                                  : 'p-1'
+                              }
+                            >
+                              {roundToTwoDecimalPlaces(tableOptMuarapahu[index][0].kmDriver)}
+                            </div>
+                            <hr></hr>
+                            <div
+                              className={
+                                item[0].kmDriver + tableOptMuarapahu[index][0].kmDriver === 0
+                                  ? 'text-danger p-1'
+                                  : 'p-1'
+                              }
+                            >
+                              {roundToTwoDecimalPlaces(
+                                item[0].kmDriver + tableOptMuarapahu[index][0].kmDriver
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Add more td elements for other properties as needed */}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           </div>
