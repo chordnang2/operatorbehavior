@@ -5,12 +5,33 @@ import {useLayout} from '../../core'
 import {KTIcon} from '../../../helpers'
 import {DefaultTitle} from './page-title/DefaultTitle'
 import {ThemeModeSwitcher} from '../../../partials'
+import axios from 'axios'
 
 const HeaderToolbar = () => {
   const {classes} = useLayout()
   const [status, setStatus] = useState<string>('1')
+  const [namaOpt, setNamaOpt] = useState<string | undefined>(undefined)
+
+  console.log(localStorage.getItem('user'))
+  const userNama = localStorage.getItem('userNama')
+  const nikOpt = localStorage.getItem('user')
 
   useEffect(() => {
+    if (!userNama) {
+      const getNama = async () => {
+        await axios
+          .post(`https://mandiriservices.biz.id/optbehav/user/${nikOpt}`)
+          .then((response) => {
+            // console.log(response.data.data[0].nama, 'getNama')
+            setNamaOpt(response.data.data[0].nama)
+            // userNama = response.data.data[0].nama
+          })
+      }
+      getNama()
+    } else {
+      setNamaOpt(userNama)
+    }
+
     const slider: target = document.querySelector('#kt_toolbar_slider') as target
     const rangeSliderValueElement: Element | null = document.querySelector(
       '#kt_toolbar_slider_value'
@@ -52,7 +73,7 @@ const HeaderToolbar = () => {
         <DefaultTitle />
         <div className='d-flex align-items-stretch overflow-auto pt-3 pt-lg-0'>
           {/* begin::Action wrapper */}
-          Hallo bapak &nbsp;<b>{localStorage.getItem('userNama')}</b>
+          Hallo bapak &nbsp;<b>{namaOpt}</b>
         </div>
         {/* end::Toolbar container */}
       </div>

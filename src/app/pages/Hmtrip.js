@@ -79,7 +79,7 @@ function Hmtrip() {
       await axios
         .post(`https://mandiriservices.biz.id/optbehav/hmtrip`, requestBody)
         .then((response) => {
-          // console.log('response_hmtrip', response)
+          console.log('response_hmtripPRODUKTIFITAS', response.data.data.dataProduktifitas)
           setHmTrip(response.data.data.dataProduktifitas)
           setDateStart(response.data.data.dateStart)
           setDateEnd(response.data.data.dateEnd)
@@ -91,7 +91,7 @@ function Hmtrip() {
       await axios
         .post(`https://mandiriservices.biz.id/optbehav/table`, requestBody)
         .then((response) => {
-          // console.log('response_table', response)
+          console.log('response_tableOPTSENYIURMUARA PAHU', response)
           // console.log(response)
 
           setTableOptSenyiur(response.data.data.hmTripSenyiur)
@@ -310,7 +310,7 @@ function Hmtrip() {
             {/* <div className='card-body py-5'> </div> */}
             <div className='card-body py-5'>
               <div className='table-responsive'>
-                {hmTrip && hmTrip.length >= 2 ? (
+                {hmTrip && hmTrip.length >= 1 ? (
                   <>
                     <table className='table table-light table-striped'>
                       <thead>
@@ -345,15 +345,27 @@ function Hmtrip() {
                       <tbody>
                         <tr className='fw-bold fs-6 text-info border-bottom-2'>
                           <td>Total HM</td>
-                          <td>{roundToTwoDecimalPlaces(hmTrip[0].sumHm + hmTrip[1].sumHm)}</td>
+                          <td>
+                            {roundToTwoDecimalPlaces(
+                              hmTrip[0].sumHm + (hmTrip[1] ? hmTrip[1].sumHm : 0)
+                            )}
+                          </td>
                         </tr>
                         <tr className='fw-bold fs-6 text-info border-bottom-2'>
                           <td>Total Ritasi</td>
-                          <td>{roundToTwoDecimalPlaces(hmTrip[0].sumRit + hmTrip[1].sumRit)}</td>
+                          <td>
+                            {roundToTwoDecimalPlaces(
+                              hmTrip[0].sumRit + (hmTrip[1] ? hmTrip[1].sumRit : 0)
+                            )}
+                          </td>
                         </tr>
                         <tr className='fw-bold fs-6 text-info border-bottom-2'>
                           <td>Total KM</td>
-                          <td>{roundToTwoDecimalPlaces(hmTrip[0].sumKm + hmTrip[1].sumKm)}</td>
+                          <td>
+                            {roundToTwoDecimalPlaces(
+                              hmTrip[0].sumKm + (hmTrip[1] ? hmTrip[1].sumKm : 0)
+                            )}
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -377,7 +389,9 @@ function Hmtrip() {
               <div className='table-responsive'>
                 {tableOptSenyiur &&
                 tableOptSenyiur.length > 2 &&
-                tableOptSenyiur.every((item) => item[0].hmDriver === 0) ? (
+                tableOptSenyiur.every((item) => item[0].hmDriver === 0) &&
+                tableOptMuarapahu.length > 2 &&
+                tableOptMuarapahu.every((item) => item[0].hmDriver === 0) ? (
                   <Kosong />
                 ) : (
                   <table className='table table-light table-striped'>

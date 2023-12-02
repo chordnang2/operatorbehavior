@@ -41,14 +41,17 @@ export default function Cek() {
 
   useEffect(() => {
     const getOperator = async () => {
+      setLoading(true)
       await axios
         .get('https://mandiriservices.biz.id/optbehav/cek')
         .then((response) => {
           //   console.log(response.data.data)
           setRowNik(response.data.data)
+          // setLoading(false)
         })
         .catch((error) => {
           console.log(error)
+          // setLoading(false)
         })
     }
     getOperator()
@@ -219,7 +222,7 @@ export default function Cek() {
                   {/* <div className='card-body py-5'> </div> */}
                   <div className='card-body py-5'>
                     <div className='table-responsive'>
-                      {hmTrip && hmTrip.length >= 2 ? (
+                      {hmTrip && hmTrip.length >= 1 ? (
                         <>
                           <table className='table table-light table-striped'>
                             <thead>
@@ -254,15 +257,27 @@ export default function Cek() {
                             <tbody>
                               <tr className='fw-bold fs-6 text-info border-bottom-2'>
                                 <td>Total HM</td>
-                                <td>{roundToTwoDecimalPlaces(hmTrip[0].sumHm + hmTrip[1].sumHm)}</td>
+                                <td>
+                                  {roundToTwoDecimalPlaces(
+                                    hmTrip[0].sumHm + (hmTrip[1] ? hmTrip[1].sumHm : 0)
+                                  )}
+                                </td>
                               </tr>
                               <tr className='fw-bold fs-6 text-info border-bottom-2'>
                                 <td>Total Ritasi</td>
-                                <td>{roundToTwoDecimalPlaces(hmTrip[0].sumRit + hmTrip[1].sumRit)}</td>
+                                <td>
+                                  {roundToTwoDecimalPlaces(
+                                    hmTrip[0].sumRit + (hmTrip[1] ? hmTrip[1].sumRit : 0)
+                                  )}
+                                </td>
                               </tr>
                               <tr className='fw-bold fs-6 text-info border-bottom-2'>
                                 <td>Total KM</td>
-                                <td>{roundToTwoDecimalPlaces(hmTrip[0].sumKm + hmTrip[1].sumKm)}</td>
+                                <td>
+                                  {roundToTwoDecimalPlaces(
+                                    hmTrip[0].sumKm + (hmTrip[1] ? hmTrip[1].sumKm : 0)
+                                  )}
+                                </td>
                               </tr>
                             </tbody>
                           </table>
@@ -286,7 +301,9 @@ export default function Cek() {
                     <div className='table-responsive'>
                       {tableOptSenyiur &&
                       tableOptSenyiur.length > 2 &&
-                      tableOptSenyiur.every((item) => item[0].hmDriver === 0) ? (
+                      tableOptSenyiur.every((item) => item[0].hmDriver === 0) &&
+                      tableOptMuarapahu.length > 2 &&
+                      tableOptMuarapahu.every((item) => item[0].hmDriver === 0) ? (
                         <Kosong />
                       ) : (
                         <table className='table table-light table-striped'>
