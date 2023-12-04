@@ -53,14 +53,34 @@ function Komplain() {
         setLoading(false)
       })
   }
+  // const botTelegram = async (nik_komplain, nama_komplain, tanggalAnomali) => {
+  //   await axios
+  //     .get(`http://localhost/optbehav/bot`)
+  //     // .get(`http://localhost:4000/optbehav/komplain`)
+  //     .then((response) => {
+  //       console.log(response, 'AMANNN TELEGRAM BOT')
+  //     })
+  // }
+
   const submitBalasan = (itemId) => {
     setLoading(true)
+
     // Find the item in the tableData array
     const itemToUpdate = tableData.find((item) => item.id === itemId)
 
+    const {nik_komplain, nama_komplain, tanggalAnomali} = itemToUpdate
+    // console.log(nik_komplain, nama_komplain, tanggalAnomali, 'AAA')
+    // botTelegram(nik_komplain, nama_komplain, tanggalAnomali)
+    // const itemNik = tableData.find((item) => item.nik_komplain === itemNik)
+    // const itemNama = tableData.find((item) => item.nik_komplain === itemNama)
+    // const itemTanggal = tableData.find((item) => item.tanggalAnomali === itemTanggal)
+
     if (itemToUpdate) {
       const requestBody = {
-        balasan: itemToUpdate.textAreaValue, // Use the text area value for this specific item
+        balasan: itemToUpdate.textAreaValue,
+        nik_komplain: nik_komplain,
+        nama_komplain: nama_komplain,
+        tanggalAnomali: tanggalAnomali,
       }
 
       axios

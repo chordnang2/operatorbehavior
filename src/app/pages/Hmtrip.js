@@ -41,6 +41,12 @@ function Hmtrip() {
   const [komplainFoto, setKomplainFoto] = useState('')
   const [loadingModal, setLoadingModal] = useState(false)
 
+  const [loadingRowkomplain, setLoadingRowkomplain] = useState(false)
+  const [rowKomplain, setRowKomplain] = useState([])
+
+  const [isKomplainButtonDisabled, setKomplainButtonDisabled] = useState(false)
+
+  console.log(rowKomplain)
   // const form = new FormData();
   // const [tableOptLokasi, setTableOptLokasi] = useState()
   // console.log(tableOptSenyiur)
@@ -192,6 +198,11 @@ function Hmtrip() {
             confirmButtonText: 'OK',
           }).then((result) => {
             if (result.isConfirmed) {
+              setKomplainButtonDisabled(true)
+              setTimeout(() => {
+                setKomplainButtonDisabled(false)
+              }, 5 * 60 * 1000)
+
               document.getElementById('closeModalKomplain').click()
             }
           })
@@ -213,6 +224,22 @@ function Hmtrip() {
     }
 
     // Hide the modal after submitting
+  }
+
+  const handleCekkomplain = async () => {
+    setLoadingRowkomplain(true)
+    await axios
+      .get(`https://mandiriservices.biz.id/optbehav/komplain/opt/${localStorage.getItem('user')}`)
+      .then((response) => {
+        console.log('LIST KOMPLAIN', response.data.data.formattedData)
+        // console.log(response)
+        setRowKomplain(response.data.data.formattedData)
+        setLoadingRowkomplain(false)
+      })
+      .catch((error) => {
+        console.log(error)
+        setLoadingRowkomplain(false)
+      })
   }
   const handleDeleteImage = async () => {
     setUploadedImage(null)
@@ -253,22 +280,42 @@ function Hmtrip() {
                   />
                 </div>
               </div>
+              <div className='p-2 align-self-center'>
+                <b>
+                  PERIODE {moment(dateStart).format('DD/MM/YY')} -{' '}
+                  {moment(dateEnd).format('DD/MM/YY')}{' '}
+                </b>
+              </div>
               <div className='d-flex'>
-                <div className='p-2 align-self-center'>
-                  <b>
-                    PERIODE {moment(dateStart).format('DD/MM/YY')} -{' '}
-                    {moment(dateEnd).format('DD/MM/YY')}{' '}
-                  </b>
+                <div className='p-2 '>
+                  <button
+                    type='button'
+                    className={`btn btn-sm ${
+                      isKomplainButtonDisabled ? 'btn-secondary' : 'btn-warning'
+                    }`}
+                    data-bs-toggle='modal'
+                    data-bs-target='#kt_modal_1'
+                    id='closeModalKomplain'
+                    disabled={isKomplainButtonDisabled}
+                  >
+                    Komplain
+                    {isKomplainButtonDisabled && (
+                      <span className='ms-2 text-muted' style={{fontSize: '0.8rem'}}>
+                        Tunggu 5 menit lagi untuk komplain
+                      </span>
+                    )}
+                  </button>
                 </div>
                 <div className='p-2 '>
                   <button
                     type='button'
-                    className='btn btn-sm btn-warning'
+                    className='btn btn-sm btn-primary'
                     data-bs-toggle='modal'
-                    data-bs-target='#kt_modal_1'
-                    id='closeModalKomplain'
+                    data-bs-target='#kt_modal_2'
+                    id='closeModalCekkomplain'
+                    onClick={handleCekkomplain}
                   >
-                    Komplain
+                    Cek Komplain
                   </button>
                 </div>
               </div>
@@ -618,6 +665,74 @@ function Hmtrip() {
                   <button type='button' className='btn btn-primary' onClick={handleKomplainSubmit}>
                     Kirim
                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className='modal fade' tabIndex={-1} id='kt_modal_2'>
+            <div className='modal-dialog'>
+              <div className='modal-content'>
+                <div className='modal-header'>
+                  <h5 className='modal-title'>Cek List Komplain</h5>
+                  <div
+                    className='btn btn-icon btn-sm btn-active-light-primary ms-2'
+                    data-bs-dismiss='modal'
+                    aria-label='Close'
+                  >
+                    <KTSVG
+                      path='/media/icons/duotune/arrows/arr061.svg'
+                      className='svg-icon svg-icon-2x'
+                    />
+                  </div>
+                </div>
+                <div className='modal-body'>
+                  {loadingRowkomplain ? (
+                    <div className='spinner-border' role='status'>
+                      <span className='visually-hidden'>Loading...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div class='table-responsive'>
+                        <table className='table text-center'>
+                          <thead>
+                            <tr>
+                              <th scope='col'>NO</th>
+                              <th scope='col'>Tanggal</th>
+                              <th scope='col'>Unit</th>
+                              <th scope='col'>Shift</th>
+                              <th scope='col'>Komplain</th>
+                              <th scope='col'>Balasan</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {rowKomplain.length === 0 ? (
+                              <tr>
+                                <td colSpan='5'>No data available</td>
+                              </tr>
+                            ) : (
+                              rowKomplain.map((item, index) => (
+                                <tr
+                                  key={index}
+                                  style={{
+                                    backgroundColor: item.balasan === null ? '#ffcccc' : '#2ecc71',
+                                    color: item.balasan === null ? 'black' : '', // Set text color to black
+                                    marginBottom: '10px', // Adjust the value as needed
+                                  }}
+                                >
+                                  <td>{index + 1}</td>
+                                  <td>{item.NewFormatTanggalAnomali}</td>
+                                  <td>{item.unit}</td>
+                                  <td>{item.shift}</td>
+                                  <td>{item.komplain}</td>
+                                  <td>{item.balasan === null ? 'Belum Dibalas' : item.balasan}</td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
