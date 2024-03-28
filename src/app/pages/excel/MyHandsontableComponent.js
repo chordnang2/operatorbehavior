@@ -18,6 +18,7 @@ function MyHandsontableComponent() {
     // Fetch data from the API endpoint using Axios
     axios
       .get(`https://mandiriservices.biz.id/optbehav/excel/${moment(dateHandson).valueOf()}`)
+      // .get(`http://localhost:4001/optbehav/excel/${moment(dateHandson).valueOf()}`)
       .then((response) => {
         const formattedData = response.data.data.map((row) => ({
           ...row,
@@ -62,7 +63,12 @@ function MyHandsontableComponent() {
     }
   }, [tableData])
 
-  return <div className='table' ref={container}></div>
+  return (
+    <>
+      <div className='table' ref={container}></div>
+      {/* <div>AAAAAAAAAAAAAAAA</div> */}
+    </>
+  )
 }
 
 export default MyHandsontableComponent
