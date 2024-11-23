@@ -7,7 +7,11 @@ import axios from 'axios'
 import {KTSVG} from '../../_metronic/helpers'
 import FormData from 'form-data'
 import Swal from 'sweetalert2'
+import {API_ENDPOINTS} from '../../config/api'
 // import fs from 'fs'
+
+const PAYMENT_SELECTION_START_DATE = 1;
+const PAYMENT_SELECTION_END_DATE = 15;
 
 function Hmtrip() {
   const usersBreadcrumbs = [
@@ -46,6 +50,8 @@ function Hmtrip() {
 
   const [isKomplainButtonDisabled, setKomplainButtonDisabled] = useState(false)
 
+  const [paymentDetails, setPaymentDetails] = useState(null)
+
   console.log(rowKomplain)
   // const form = new FormData();
   // const [tableOptLokasi, setTableOptLokasi] = useState()
@@ -70,7 +76,7 @@ function Hmtrip() {
       // console.log(moment(selectedDate).format('YYYY-MM-DD'), localStorage.getItem('user'))
       setLoading(true)
       await axios
-        .post(`https://mandiriservices.biz.id/optbehav/peringkat`, requestBody)
+        .post(API_ENDPOINTS.peringkat, requestBody)
         .then((response) => {
           // console.log('response_peringkat', response)
           setTotalPeringkat(response.data.data.dataTotalPeringkat)
@@ -83,7 +89,7 @@ function Hmtrip() {
         })
 
       await axios
-        .post(`https://mandiriservices.biz.id/optbehav/hmtrip`, requestBody)
+        .post(API_ENDPOINTS.hmtrip, requestBody)
         .then((response) => {
           console.log('response_hmtripPRODUKTIFITAS', response.data.data.dataProduktifitas)
           setHmTrip(response.data.data.dataProduktifitas)
@@ -95,7 +101,7 @@ function Hmtrip() {
           console.error('Error hmTrip:', error)
         })
       await axios
-        .post(`https://mandiriservices.biz.id/optbehav/table`, requestBody)
+        .post(API_ENDPOINTS.table, requestBody)
         .then((response) => {
           console.log('response_tableOPTSENYIURMUARA PAHU', response)
           // console.log(response)
@@ -175,7 +181,7 @@ function Hmtrip() {
       // Make the POST request with axios
       setLoadingModal(true)
       await axios
-        .post('https://mandiriservices.biz.id/optbehav/komplain/opt', form, {
+        .post(API_ENDPOINTS.komplain, form, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -229,7 +235,7 @@ function Hmtrip() {
   const handleCekkomplain = async () => {
     setLoadingRowkomplain(true)
     await axios
-      .get(`https://mandiriservices.biz.id/optbehav/komplain/opt/${localStorage.getItem('user')}`)
+      .get(API_ENDPOINTS.getKomplain(localStorage.getItem('user')))
       .then((response) => {
         console.log('LIST KOMPLAIN', response.data.data.formattedData)
         // console.log(response)
@@ -251,6 +257,171 @@ function Hmtrip() {
   function roundToTwoDecimalPlaces(number) {
     return Number(number.toFixed(2))
   }
+
+  // useEffect(() => {
+  //   // Show welcome popup when component mounts
+  //   Swal.fire({
+  //     title: 'Selamat Datang!',
+  //     text: 'Ini adalah halaman produktifitas',
+  //     icon: 'info',
+  //     confirmButtonText: 'OK'
+  //   })
+  // }, []) // Empty dependency array means this runs once when component mounts
+
+  const handlePaymentSelection = async (paymentMethod) => {
+    try {
+      const currentDate = new Date();
+      const currentDay = currentDate.getDate();
+      const currentMonth = moment(currentDate).format('YYYY-MM');
+      const userNik = localStorage.getItem('user');
+
+      if (currentDay < PAYMENT_SELECTION_START_DATE || currentDay > PAYMENT_SELECTION_END_DATE) {
+        Swal.fire({
+          title: 'Tidak Dapat Memilih',
+          text: `Pemilihan metode pembayaran hanya dapat dilakukan pada tanggal ${PAYMENT_SELECTION_START_DATE}-${PAYMENT_SELECTION_END_DATE}`,
+          icon: 'warning'
+        });
+        return;
+      }
+
+      const response = await axios.get(`${API_ENDPOINTS.uang.getAll}?nik=${userNik}&bulan=${currentMonth}`);
+      const existingRecord = response.data.data[0];
+
+      const body = {
+        nik: userNik,
+        bulan: currentMonth,
+        uang: paymentMethod
+      };
+
+      if (existingRecord) {
+        await axios.patch(`${API_ENDPOINTS.uang.update(existingRecord.id)}`, body);
+      } else {
+        await axios.post(API_ENDPOINTS.uang.create, body);
+      }
+      
+      // Langsung update state paymentDetails dengan data baru
+      setPaymentDetails({
+        ...existingRecord,
+        uang: paymentMethod,
+        bulan: currentMonth
+      });
+
+      Swal.fire({
+        title: 'Terima Kasih!',
+        text: `Anda memilih pembayaran secara ${paymentMethod}`,
+        icon: 'success'
+      });
+    } catch (error) {
+      console.error('Error saving payment selection:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'Gagal menyimpan pilihan pembayaran',
+        icon: 'error'
+      });
+    }
+  }
+
+  useEffect(() => {
+    const showPaymentPopup = async () => {
+      const currentDate = new Date();
+      const currentDay = currentDate.getDate();
+      const currentMonth = moment(currentDate).format('YYYY-MM');
+      const userNik = localStorage.getItem('user');
+
+      // Using constants for date range check
+      if (currentDay >= PAYMENT_SELECTION_START_DATE && currentDay <= PAYMENT_SELECTION_END_DATE) {
+        try {
+          // Check if record exists
+          const response = await axios.get(`${API_ENDPOINTS.uang.getAll}?nik=${userNik}&bulan=${currentMonth}`);
+          const existingRecord = response.data.data.length > 0;
+          
+          if (!existingRecord) {
+            Swal.fire({
+              title: 'Pilih Metode Pembayaran',
+              text: 'Silahkan pilih uang bulanan ini',
+              icon: 'question',
+              input: 'radio',
+              inputOptions: {
+                'cash': 'Cash',
+                'transfer': 'Transfer'
+              },
+              inputValidator: (value) => {
+                if (!value) {
+                  return 'Anda harus memilih salah satu!'
+                }
+              },
+              confirmButtonText: 'Pilih',
+              allowOutsideClick: false,
+              allowEscapeKey: false
+            }).then((result) => {
+              if (result.isConfirmed) {
+                handlePaymentSelection(result.value);
+              }
+            });
+          } else {
+            // Add a button to allow updates during the valid period
+            Swal.fire({
+              title: 'Metode Pembayaran',
+              text: 'Anda sudah memilih metode pembayaran. Ingin mengubah pilihan?',
+              icon: 'info',
+              showCancelButton: true,
+              confirmButtonText: 'Ya, ubah',
+              cancelButtonText: 'Tidak'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                Swal.fire({
+                  title: 'Pilih Metode Pembayaran',
+                  text: 'Silahkan pilih uang bulanan ini',
+                  icon: 'question',
+                  input: 'radio',
+                  inputOptions: {
+                    'cash': 'Cash',
+                    'transfer': 'Transfer'
+                  },
+                  inputValidator: (value) => {
+                    if (!value) {
+                      return 'Anda harus memilih salah satu!'
+                    }
+                  },
+                  confirmButtonText: 'Pilih'
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    handlePaymentSelection(result.value);
+                  }
+                });
+              }
+            });
+          }
+        } catch (error) {
+          console.error('Error checking payment status:', error);
+        }
+      }
+    };
+
+    showPaymentPopup();
+  }, []); // Empty dependency array means this runs once when component mounts
+
+  useEffect(() => {
+    const fetchPaymentDetails = async () => {
+      try {
+        const currentMonth = moment(selectedDate).format('YYYY-MM')
+        const userNik = localStorage.getItem('user')
+        const response = await axios.get(`${API_ENDPOINTS.uang.getAll}?nik=${userNik}&bulan=${currentMonth}`)
+        
+        if (response.data.data.length > 0) {
+          setPaymentDetails(response.data.data[0])
+        } else {
+          setPaymentDetails(null)
+        }
+      } catch (error) {
+        console.error('Error fetching payment details:', error)
+        setPaymentDetails(null)
+      }
+    }
+
+    fetchPaymentDetails()
+  }, [selectedDate])
+
   return (
     <>
       {loading ? (
@@ -342,6 +513,111 @@ function Hmtrip() {
                 totalPeringkat[0].totalOrang + ' Orang'
               ) : (
                 <Kosong />
+              )}
+            </div>
+          </div>
+          <div className='card card-custom card-flush mb-5'>
+            <div className='card-header'>
+              <h3 className='card-title'>Uang Bulanan</h3>
+              <div className='card-toolbar'>
+                {paymentDetails && (() => {
+                  const currentDate = new Date();
+                  const currentDay = currentDate.getDate();
+                  return currentDay >= PAYMENT_SELECTION_START_DATE && 
+                         currentDay <= PAYMENT_SELECTION_END_DATE ? (
+                    <button 
+                      type='button' 
+                      className='btn btn-sm btn-primary'
+                      onClick={() => {
+                        Swal.fire({
+                          title: 'Ubah Metode Pembayaran',
+                          text: 'Silahkan pilih uang bulanan ini',
+                          icon: 'question',
+                          input: 'radio',
+                          inputOptions: {
+                            'cash': 'Cash',
+                            'transfer': 'Transfer'
+                          },
+                          inputValidator: (value) => {
+                            if (!value) {
+                              return 'Anda harus memilih salah satu!'
+                            }
+                          },
+                          confirmButtonText: 'Pilih'
+                        }).then((result) => {
+                          if (result.isConfirmed) {
+                            handlePaymentSelection(result.value);
+                          }
+                        });
+                      }}
+                    >
+                      Ubah Metode Pembayaran
+                    </button>
+                  ) : (
+                    <button 
+                      type='button' 
+                      className='btn btn-sm btn-secondary' 
+                      disabled
+                      title='Perubahan hanya dapat dilakukan pada tanggal 1-23'
+                    >
+                      Ubah Metode Pembayaran
+                    </button>
+                  )
+                })()}
+              </div>
+            </div>
+            <div className='card-body py-5'>
+              {paymentDetails ? (
+                <div className='d-flex flex-column'>
+                  <div className='d-flex justify-content-between mb-2'>
+                    <span className='fw-bold'>Status Pembayaran:</span>
+                    <span className={`badge badge-${paymentDetails.uang === 'cash' ? 'primary' : 'success'}`}>
+                      {paymentDetails.uang === 'cash' ? 'Cash' : 'Transfer'}
+                    </span>
+                  </div>
+                  <div className='d-flex justify-content-between mb-2'>
+                    <span className='fw-bold'>Periode:</span>
+                    <span>{moment(paymentDetails.bulan).format('MMMM YYYY')}</span>
+                  </div>
+                  <div className='alert alert-info d-flex align-items-center p-5 mb-2'>
+                    <span className='svg-icon svg-icon-2hx svg-icon-info me-3'>
+                      <KTSVG path='/media/icons/duotune/general/gen044.svg' className='svg-icon-2' />
+                    </span>
+                    <div className='d-flex flex-column'>
+                      <span className='fw-bold'>Informasi Pembayaran</span>
+                      <span>
+                        Pembayaran sebesar Rp 1.000.000 akan dilakukan melalui {paymentDetails.uang === 'cash' ? 'Cash' : 'Transfer'} 
+                  
+                      </span>
+                    </div>
+                  </div>
+                  <div className='alert alert-warning d-flex align-items-center p-5'>
+                    <span className='svg-icon svg-icon-2hx svg-icon-warning me-3'>
+                      <KTSVG path='/media/icons/duotune/general/gen044.svg' className='svg-icon-2' />
+                    </span>
+                    <div className='d-flex flex-column'>
+                      <span>
+                        Pemilihan metode pembayaran hanya dapat dilakukan pada tanggal {PAYMENT_SELECTION_START_DATE}-{PAYMENT_SELECTION_END_DATE} setiap bulannya
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className='d-flex flex-column'>
+                  <div className='text-center text-gray-600 mb-4'>
+                    Belum ada pemilihan metode pembayaran untuk periode ini
+                  </div>
+                  <div className='alert alert-warning d-flex align-items-center p-5'>
+                    <span className='svg-icon svg-icon-2hx svg-icon-warning me-3'>
+                      <KTSVG path='/media/icons/duotune/general/gen044.svg' className='svg-icon-2' />
+                    </span>
+                    <div className='d-flex flex-column'>
+                      <span>
+                        Pemilihan metode pembayaran hanya dapat dilakukan pada tanggal {PAYMENT_SELECTION_START_DATE}-{PAYMENT_SELECTION_END_DATE} setiap bulannya
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>

@@ -47,6 +47,7 @@ export function AsideMenuMain() {
           <AsideMenuItem to='/behavior/komplain' icon='switch' title='Komplain' />
           <AsideMenuItem to='/behavior/cek' icon='switch' title='Cek' />
           <AsideMenuItem to='/behavior/optmaincek' icon='switch' title='Opt Main Cek' />
+          <AsideMenuItem to='/uang' icon='switch' title='Uang Operator' />
         </>
       )
     } else {

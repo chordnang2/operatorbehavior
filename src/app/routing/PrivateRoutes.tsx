@@ -15,6 +15,7 @@ import Hmtrip from '../pages/Hmtrip'
 import Komplainopt from '../pages/Komplainopt'
 import Cek from '../pages/cek/Cek'
 import Optmaincek from '../pages/cek/Optmaincek'
+import Uang from '../pages/Uang'
 
 const PrivateRoutes = () => {
   const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
@@ -90,6 +91,14 @@ const PrivateRoutes = () => {
           element={
             <SuspensedView>
               <Komplainopt />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='uang/*'
+          element={
+            <SuspensedView>
+              <Uang />
             </SuspensedView>
           }
         />
