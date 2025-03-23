@@ -43,7 +43,7 @@ export default function Cek() {
     const getOperator = async () => {
       setLoading(true)
       await axios
-        .get('https://mandiriservices.biz.id/optbehav/cek')
+        .get('https://produksi.mandiriservices.biz.id/optbehav/cek')
         .then((response) => {
           //   console.log(response.data.data)
           setRowNik(response.data.data)
@@ -64,7 +64,7 @@ export default function Cek() {
       // console.log(moment(selectedDate).format('YYYY-MM-DD'), localStorage.getItem('user'))
       setLoading(true)
       await axios
-        .post(`https://mandiriservices.biz.id/optbehav/peringkat`, requestBody)
+        .post(`https://produksi.mandiriservices.biz.id/optbehav/peringkat`, requestBody)
         .then((response) => {
           // console.log('response_peringkat', response)
           setTotalPeringkat(response.data.data.dataTotalPeringkat)
@@ -77,7 +77,7 @@ export default function Cek() {
         })
 
       await axios
-        .post(`https://mandiriservices.biz.id/optbehav/hmtrip`, requestBody)
+        .post(`https://produksi.mandiriservices.biz.id/optbehav/hmtrip`, requestBody)
         .then((response) => {
           // console.log('response_hmtrip', response)
           setHmTrip(response.data.data.dataProduktifitas)
@@ -89,7 +89,7 @@ export default function Cek() {
           console.error('Error hmTrip:', error)
         })
       await axios
-        .post(`https://mandiriservices.biz.id/optbehav/table`, requestBody)
+        .post(`https://produksi.mandiriservices.biz.id/optbehav/table`, requestBody)
         .then((response) => {
           console.log('response_table', response)
           // console.log(response)
@@ -115,7 +115,7 @@ export default function Cek() {
 
     const getNama = async () => {
       await axios
-        .post(`https://mandiriservices.biz.id/optbehav/user/${selectedNik}`)
+        .post(`https://produksi.mandiriservices.biz.id/optbehav/user/${selectedNik}`)
         .then((response) => {
           // console.log(response.data.data[0].nama, 'getNama')
           setNamaOpt(response.data.data[0].nama)

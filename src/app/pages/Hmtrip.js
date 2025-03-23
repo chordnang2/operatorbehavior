@@ -13,6 +13,69 @@ import {API_ENDPOINTS} from '../../config/api'
 const PAYMENT_SELECTION_START_DATE = 1;
 const PAYMENT_SELECTION_END_DATE = 15;
 
+const safetyMessages = [
+  {
+    title: "Patuhi Aturan Kecepatan dan Rambu Lalu Lintas",
+    points: [
+      "Selalu berkendara sesuai batas kecepatan yang ditentukan.",
+      "Perhatikan dan patuhi semua rambu-rambu di jalur hauling.",
+      "Jaga jarak aman dengan kendaraan di depan."
+    ]
+  },
+  {
+    title: "Periksa Kendaraan Sebelum Beroperasi (Pre-Start Check)",
+    points: [
+      "Pastikan rem, lampu, klakson, dan sistem hidrolik berfungsi dengan baik.",
+      "Periksa tekanan ban dan kebocoran oli atau bahan bakar.",
+      "Laporkan jika ada kerusakan atau potensi bahaya sebelum mengoperasikan unit."
+    ]
+  },
+  {
+    title: "Hindari Distraksi Saat Mengemudi",
+    points: [
+      "Jangan menggunakan ponsel atau perangkat lain saat berkendara.",
+      "Fokus penuh pada kondisi jalan dan lingkungan sekitar.",
+      "Gunakan komunikasi radio hanya untuk keperluan operasional yang mendesak."
+    ]
+  },
+  {
+    title: "Waspada terhadap Kondisi Jalan",
+    points: [
+      "Perhatikan jalan berlubang, tikungan tajam, dan tanjakan/turunan curam.",
+      "Jangan berkendara terlalu dekat dengan tepi jalan yang rawan longsor.",
+      "Sesuaikan kecepatan dengan kondisi cuaca, terutama saat hujan atau kabut."
+    ]
+  },
+  {
+    title: "Gunakan Alat Pelindung Diri (APD) yang Tepat",
+    points: [
+      "Wajib menggunakan helm, sepatu safety, rompi reflektif, dan perlengkapan lainnya.",
+      "Pastikan APD dalam kondisi baik dan sesuai standar keselamatan."
+    ]
+  },
+  {
+    title: "Hindari Mengemudi dalam Keadaan Tidak Fit",
+    points: [
+      "Jangan mengoperasikan kendaraan jika sedang sakit atau dalam pengaruh obat-obatan yang menyebabkan kantuk.",
+      "Laporkan ke atasan jika merasa tidak fit untuk bekerja."
+    ]
+  },
+  {
+    title: "Berkomunikasi dan Berkoordinasi dengan Tim",
+    points: [
+      "Gunakan radio komunikasi dengan baik untuk koordinasi dengan loader, dispatcher, dan operator lainnya.",
+      "Beri tahu lokasi dan kondisi kendaraan jika terjadi kendala di jalan."
+    ]
+  },
+  {
+    title: "Patuhi Prosedur Parkir yang Aman",
+    points: [
+      "Pastikan kendaraan diparkir di area yang ditentukan dan di permukaan yang rata.",
+      "Aktifkan rem tangan dan gunakan ganjal roda saat parkir."
+    ]
+  }
+]
+
 function Hmtrip() {
   const usersBreadcrumbs = [
     {
@@ -321,83 +384,256 @@ function Hmtrip() {
     }
   }
 
-  useEffect(() => {
-    const showPaymentPopup = async () => {
-      const currentDate = new Date();
-      const currentDay = currentDate.getDate();
-      const currentMonth = moment(currentDate).format('YYYY-MM');
-      const userNik = localStorage.getItem('user');
+  const showPaymentPopup = async () => {
+    const currentDate = new Date();
+    const currentDay = currentDate.getDate();
+    const currentMonth = moment(currentDate).format('YYYY-MM');
+    const userNik = localStorage.getItem('user');
 
-      // Using constants for date range check
-      if (currentDay >= PAYMENT_SELECTION_START_DATE && currentDay <= PAYMENT_SELECTION_END_DATE) {
-        try {
-          // Check if record exists
-          const response = await axios.get(`${API_ENDPOINTS.uang.getAll}?nik=${userNik}&bulan=${currentMonth}`);
-          const existingRecord = response.data.data.length > 0;
-          
-          if (!existingRecord) {
-            Swal.fire({
-              title: 'Pilih Metode Pembayaran',
-              text: 'Silahkan pilih uang bulanan ini',
-              icon: 'question',
-              input: 'radio',
-              inputOptions: {
-                'cash': 'Cash',
-                'transfer': 'Transfer'
-              },
-              inputValidator: (value) => {
-                if (!value) {
-                  return 'Anda harus memilih salah satu!'
-                }
-              },
-              confirmButtonText: 'Pilih',
-              allowOutsideClick: false,
-              allowEscapeKey: false
-            }).then((result) => {
-              if (result.isConfirmed) {
-                handlePaymentSelection(result.value);
-              }
-            });
-          } else {
-            // Add a button to allow updates during the valid period
-            Swal.fire({
-              title: 'Metode Pembayaran',
-              text: 'Anda sudah memilih metode pembayaran. Ingin mengubah pilihan?',
-              icon: 'info',
-              showCancelButton: true,
-              confirmButtonText: 'Ya, ubah',
-              cancelButtonText: 'Tidak'
-            }).then((result) => {
-              if (result.isConfirmed) {
-                Swal.fire({
-                  title: 'Pilih Metode Pembayaran',
-                  text: 'Silahkan pilih uang bulanan ini',
-                  icon: 'question',
-                  input: 'radio',
-                  inputOptions: {
-                    'cash': 'Cash',
-                    'transfer': 'Transfer'
-                  },
-                  inputValidator: (value) => {
-                    if (!value) {
-                      return 'Anda harus memilih salah satu!'
-                    }
-                  },
-                  confirmButtonText: 'Pilih'
-                }).then((result) => {
-                  if (result.isConfirmed) {
-                    handlePaymentSelection(result.value);
-                  }
-                });
-              }
-            });
-          }
-        } catch (error) {
-          console.error('Error checking payment status:', error);
-        }
+    // Show safety message first
+    const randomSafetyMessage = safetyMessages[Math.floor(Math.random() * safetyMessages.length)];
+    
+    await Swal.fire({
+      title: '<span class="safety-title">🚨 Pesan Keselamatan Kerja 🚨</span>',
+      html: `
+        <div class="safety-message">
+          <div class="safety-header mb-3">
+            <div class="safety-icon-wrapper mb-2">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <h5 class="text-danger fw-bolder mb-2">${randomSafetyMessage.title}</h5>
+            <div class="safety-divider"></div>
+          </div>
+          <div class="safety-points">
+            ${randomSafetyMessage.points.map(point => `
+              <div class="safety-point">
+                <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                ${formatSafetyPoint(point)}
+              </div>
+            `).join('')}
+          </div>
+          <div class="safety-footer mt-3">
+            <div class="alert alert-warning d-flex align-items-center py-2" role="alert">
+              <i class="bi bi-lightbulb-fill text-warning me-2"></i>
+              <small><strong>Ingat:</strong> Keselamatan Anda adalah prioritas utama kami!</small>
+            </div>
+          </div>
+        </div>
+      `,
+      confirmButtonText: '<i class="bi bi-check-circle me-2"></i>Saya Mengerti dan Akan Mematuhi',
+      confirmButtonColor: '#009ef7',
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp'
+      },
+      width: '600px',
+      customClass: {
+        container: 'safety-modal',
+        popup: 'safety-popup',
+        content: 'safety-content',
+        confirmButton: 'btn btn-primary'
+      },
+      allowOutsideClick: false,
+      backdrop: `
+        rgba(0,0,0,0.4)
+        url("/media/misc/safety-pattern.png")
+        left top
+        repeat
+      `
+    });
+
+    // Add custom styles to document head
+    const style = document.createElement('style');
+    style.textContent = `
+      .safety-title {
+        color: #009ef7;
+        font-size: 1.25rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-rendering: optimizeLegibility;
       }
-    };
+      
+      .safety-icon-wrapper {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(45deg, #009ef7, #0095e8);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .safety-icon-wrapper i {
+        font-size: 30px;
+        color: white;
+        text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+      }
+      
+      .safety-divider {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #009ef7, transparent);
+        margin: 10px 0;
+      }
+      
+      .safety-point {
+        background-color: #f1faff;
+        border-left: 4px solid #009ef7;
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        border-radius: 0 8px 8px 0;
+        text-align: left;
+        transition: transform 0.2s;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #1e1e1e;
+        font-weight: 400;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      .safety-point:hover {
+        transform: translateX(5px);
+        background-color: #e1f0ff;
+      }
+      
+      .safety-point strong {
+        font-weight: 600;
+        color: #000;
+      }
 
+      .safety-point strong.text-danger {
+        color: #dc3545 !important;
+      }
+
+      .safety-point strong.text-success {
+        color: #198754 !important;
+      }
+      
+      .safety-footer {
+        border-top: 1px dashed #e4e6ef;
+        padding-top: 10px;
+      }
+
+      .safety-footer .alert {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+        font-weight: 400;
+      }
+      
+      .animate__animated {
+        animation-duration: 0.5s;
+      }
+
+      .swal2-popup {
+        padding: 1rem;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+
+      .swal2-title {
+        padding: 0.5rem 0;
+      }
+
+      .swal2-html-container {
+        margin: 0.5rem 0;
+        text-align: left !important;
+      }
+
+      .swal2-actions {
+        margin: 1rem 0 0;
+      }
+
+      .safety-message {
+        max-height: calc(90vh - 200px);
+      }
+
+      .btn-primary {
+        font-weight: 500;
+        letter-spacing: 0.3px;
+      }
+
+      .bi {
+        display: inline-block;
+        vertical-align: -0.125em;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Continue with payment selection logic
+    if (currentDay >= PAYMENT_SELECTION_START_DATE && currentDay <= PAYMENT_SELECTION_END_DATE) {
+      try {
+        // Check if record exists
+        const response = await axios.get(`${API_ENDPOINTS.uang.getAll}?nik=${userNik}&bulan=${currentMonth}`);
+        const existingRecord = response.data.data.length > 0;
+        
+        if (!existingRecord) {
+          Swal.fire({
+            title: 'Pilih Metode Pembayaran',
+            text: 'Silahkan pilih uang bulanan ini',
+            icon: 'question',
+            input: 'radio',
+            inputOptions: {
+              'cash': 'Cash',
+              'transfer': 'Transfer'
+            },
+            inputValidator: (value) => {
+              if (!value) {
+                return 'Anda harus memilih salah satu!'
+              }
+            },
+            confirmButtonText: 'Pilih',
+            allowOutsideClick: false,
+            allowEscapeKey: false
+          }).then((result) => {
+            if (result.isConfirmed) {
+              handlePaymentSelection(result.value);
+            }
+          });
+        } else {
+          // Add a button to allow updates during the valid period
+          Swal.fire({
+            title: 'Metode Pembayaran',
+            text: 'Anda sudah memilih metode pembayaran. Ingin mengubah pilihan?',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, ubah',
+            cancelButtonText: 'Tidak'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              Swal.fire({
+                title: 'Pilih Metode Pembayaran',
+                text: 'Silahkan pilih uang bulanan ini',
+                icon: 'question',
+                input: 'radio',
+                inputOptions: {
+                  'cash': 'Cash',
+                  'transfer': 'Transfer'
+                },
+                inputValidator: (value) => {
+                  if (!value) {
+                    return 'Anda harus memilih salah satu!'
+                  }
+                },
+                confirmButtonText: 'Pilih'
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  handlePaymentSelection(result.value);
+                }
+              });
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error checking payment status:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
     showPaymentPopup();
   }, []); // Empty dependency array means this runs once when component mounts
 
@@ -421,6 +657,17 @@ function Hmtrip() {
 
     fetchPaymentDetails()
   }, [selectedDate])
+
+  // Helper function to format safety points with emphasis
+  const formatSafetyPoint = (point) => {
+    // Add bold to important words
+    const emphasizedText = point
+      .replace(/(wajib|penting|harus|jangan|pastikan|perhatikan|selalu|hindari)/gi, '<strong>$1</strong>')
+      .replace(/(bahaya|warning|peringatan|emergency|darurat)/gi, '<strong class="text-danger">$1</strong>')
+      .replace(/(selamat|aman|safety)/gi, '<strong class="text-success">$1</strong>');
+    
+    return emphasizedText;
+  };
 
   return (
     <>

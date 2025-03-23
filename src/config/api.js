@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'https://mandiriservices.biz.id'
+export const API_BASE_URL = 'https://produksi.mandiriservices.biz.id'
 
 export const API_ENDPOINTS = {
     peringkat: `${API_BASE_URL}/optbehav/peringkat`,

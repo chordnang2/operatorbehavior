@@ -20,7 +20,7 @@ const HeaderToolbar = () => {
     if (!userNama) {
       const getNama = async () => {
         await axios
-          .post(`https://mandiriservices.biz.id/optbehav/user/${nikOpt}`)
+          .post(`https://produksi.mandiriservices.biz.id/optbehav/user/${nikOpt}`)
           .then((response) => {
             // console.log(response.data.data[0].nama, 'getNama')
             setNamaOpt(response.data.data[0].nama)

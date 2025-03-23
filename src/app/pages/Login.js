@@ -8,11 +8,68 @@ function Login() {
   const [nik, setNik] = useState('')
   const [password, setPassword] = useState('')
   const [nama, setNama] = useState('')
+  const [safetyMessage, setSafetyMessage] = useState('')
 
   const navigate = useNavigate()
   const [backgroundImage, setBackgroundImage] = useState('')
   const loginButtonRef = useRef(null)
 
+  const safetyMessages = [
+    {
+      title: "Kenali Tanda-tanda Kelelahan",
+      points: [
+        "Menguap berulang kali",
+        "Sulit berkonsentrasi atau kehilangan fokus",
+        "Reaksi lebih lambat dari biasanya",
+        "Mengantuk atau mata terasa berat"
+      ]
+    },
+    {
+      title: "Pastikan Istirahat yang Cukup",
+      points: [
+        "Tidur minimal 7-9 jam sebelum bekerja",
+        "Manfaatkan waktu istirahat dengan baik",
+        "Hindari begadang sebelum giliran kerja"
+      ]
+    },
+    {
+      title: "Jaga Pola Makan dan Hidrasi",
+      points: [
+        "Konsumsi makanan sehat dan bergizi",
+        "Hindari makanan berat dan berminyak sebelum berkendara",
+        "Minum air yang cukup untuk tetap terhidrasi"
+      ]
+    },
+    {
+      title: "Gunakan Teknik Pencegahan Fatigue",
+      points: [
+        "Lakukan peregangan ringan sebelum mulai bekerja",
+        "Gunakan teknik pernapasan dalam untuk menjaga kesadaran",
+        "Berkomunikasi dengan rekan kerja jika merasa lelah"
+      ]
+    },
+    {
+      title: "Patuhi Aturan Keselamatan",
+      points: [
+        "Jangan memaksakan diri jika merasa sangat lelah",
+        "Gunakan sistem rotasi shift secara efektif",
+        "Laporkan ke atasan jika mengalami tanda-tanda fatigue"
+      ]
+    },
+    {
+      title: "Manfaatkan Sistem Pengawas Fatigue",
+      points: [
+        "Gunakan alat pemantau kelelahan jika tersedia",
+        "Jangan abaikan peringatan dari sistem keselamatan"
+      ]
+    }
+  ]
+
+  useEffect(() => {
+    // Get random safety message when component mounts
+    const randomIndex = Math.floor(Math.random() * safetyMessages.length)
+    setSafetyMessage(safetyMessages[randomIndex])
+  }, [])
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
@@ -24,7 +81,7 @@ function Login() {
 
   const handleGetNama = async () => {
     await axios
-      .post(`https://mandiriservices.biz.id/optbehav/user/${nik}`)
+      .post(`https://produksi.mandiriservices.biz.id/optbehav/user/${nik}`)
       .then((response) => {
         console.log(response.data.data[0].nama, 'response sukses')
         if (response.data.data) {
@@ -44,7 +101,7 @@ function Login() {
       password: password,
     }
     await axios
-      .post(`https://mandiriservices.biz.id/optbehav/login`, body)
+      .post(`https://produksi.mandiriservices.biz.id/optbehav/login`, body)
       .then((response) => {
         // console.log(response.data.user)
         if (response.data.user && response.data.user === 'admin') {
@@ -119,6 +176,48 @@ function Login() {
           maxWidth: '600px',
         }}
       >
+        {/* Safety Message Box */}
+        {safetyMessage && (
+          <div className="safety-message-box mb-5" 
+            style={{
+              border: '1px solid #e4e6ef',
+              borderRadius: '8px',
+              padding: '20px',
+              backgroundColor: '#fff',
+              boxShadow: '0 0 20px rgba(0,0,0,0.05)',
+            }}>
+            <div className="d-flex align-items-center mb-3">
+              <div className="safety-icon me-3"
+                style={{
+                  backgroundColor: '#009ef7',
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <i className="bi bi-shield-check text-white fs-4"></i>
+              </div>
+              <h5 className="mb-0" style={{ color: '#009ef7' }}>
+                {safetyMessage.title}
+              </h5>
+            </div>
+            <div className="safety-points"
+              style={{
+                backgroundColor: '#f1faff',
+                borderRadius: '6px',
+                padding: '15px 20px',
+              }}>
+              {safetyMessage.points.map((point, index) => (
+                <div key={index} className="d-flex align-items-center mb-2">
+                  <i className="bi bi-check2-circle me-2" style={{ color: '#009ef7' }}></i>
+                  <span>{point}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div className='d-flex flex-center flex-column flex-lg-row-fluid'>
           <div className='w-lg-500px p-10'>
             <form

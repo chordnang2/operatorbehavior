@@ -36,7 +36,7 @@ function Komplain() {
 
   const getKomplain = () => {
     axios
-      .get(`https://mandiriservices.biz.id/optbehav/komplain`)
+      .get(`https://produksi.mandiriservices.biz.id/optbehav/komplain`)
       // .get(`http://localhost:4000/optbehav/komplain`)
       .then((response) => {
         const formattedData = response.data.data.map((row) => ({
@@ -84,7 +84,7 @@ function Komplain() {
       }
 
       axios
-        .patch(`https://mandiriservices.biz.id/optbehav/komplain/balasan/${itemId}`, requestBody)
+        .patch(`https://produksi.mandiriservices.biz.id/optbehav/komplain/balasan/${itemId}`, requestBody)
         .then((response) => {
           console.log('Balasan submitted successfully:', response)
           getKomplain()

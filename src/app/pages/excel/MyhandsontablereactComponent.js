@@ -37,7 +37,7 @@ const MyhandsontablereactComponent = () => {
     // Fetch data from the API endpoint using Axios
     axios
       // .get(`http://localhost:4100/optbehav/excel/${dateHandson.toString()}`)
-      .get(`https://mandiriservices.biz.id/optbehav/excel/${dateHandson.toString()}`)
+      .get(`https://produksi.mandiriservices.biz.id/optbehav/excel/${dateHandson.toString()}`)
       .then((response) => {
         const formattedData = response.data.data.map((row) => ({
           ...row,
@@ -66,7 +66,7 @@ const MyhandsontablereactComponent = () => {
     axios
       .post(
         // `http://localhost:4001/optbehav/excel/create/${dateHandson.toString()}`,
-        `https://mandiriservices.biz.id/optbehav/excel/create/${dateHandson.toString()}`,
+        `https://produksi.mandiriservices.biz.id/optbehav/excel/create/${dateHandson.toString()}`,
         data,
         {
           headers: {

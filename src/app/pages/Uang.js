@@ -27,8 +27,8 @@ const Uang = () => {
         setLoading(true);
         try {
             const [uangResponse, operatorResponse] = await Promise.all([
-                axios.get(`https://mandiriservices.biz.id/optbehav/uang?bulan=${selectedMonth}`),
-                axios.get(`https://mandiriservices.biz.id/optbehav/operatorall?bulan=${selectedMonth}`)
+                axios.get(`https://produksi.mandiriservices.biz.id/optbehav/uang?bulan=${selectedMonth}`),
+                axios.get(`https://produksi.mandiriservices.biz.id/optbehav/operatorall?bulan=${selectedMonth}`)
             ]);
 
             setUangData(uangResponse.data.data);

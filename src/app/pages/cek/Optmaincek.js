@@ -35,7 +35,7 @@ export default function Optmaincek() {
     setLoading(true)
     const getOperator = async () => {
       await axios
-        .get('https://mandiriservices.biz.id/optbehav/cek')
+        .get('https://produksi.mandiriservices.biz.id/optbehav/cek')
         .then((response) => {
           //   console.log(response.data.data)
           setRowNik(response.data.data)
@@ -54,7 +54,7 @@ export default function Optmaincek() {
         nik: `${selectedNik}`,
       }
       await axios
-        .post(`https://mandiriservices.biz.id/optbehav/cek/opt`, requestBody)
+        .post(`https://produksi.mandiriservices.biz.id/optbehav/cek/opt`, requestBody)
         .then((response) => {
           // console.log(response.data.data, 'DATA MONTHLY')
           setLoading(false)
@@ -81,7 +81,7 @@ export default function Optmaincek() {
     console.log(requestBody, 'requestBody')
     setLoadingModal(true)
     await axios
-      .post('https://mandiriservices.biz.id/optbehav/cek/dino', requestBody)
+      .post('https://produksi.mandiriservices.biz.id/optbehav/cek/dino', requestBody)
       .then((response) => {
         // console.log(response, 'response')
         setRowDetail(response.data.data)
