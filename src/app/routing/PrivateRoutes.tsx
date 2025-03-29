@@ -16,6 +16,8 @@ import Komplainopt from '../pages/Komplainopt'
 import Cek from '../pages/cek/Cek'
 import Optmaincek from '../pages/cek/Optmaincek'
 import Uang from '../pages/Uang'
+import Pelanggaran from '../pages/pelanggaran/Pelanggaran'
+import Sp from '../pages/pelanggaran/Sp'
 
 const PrivateRoutes = () => {
   const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
@@ -99,6 +101,22 @@ const PrivateRoutes = () => {
           element={
             <SuspensedView>
               <Uang />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='pelanggaran/*'
+          element={
+            <SuspensedView>
+              <Pelanggaran />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path='sp/*'
+          element={
+            <SuspensedView>
+              <Sp />
             </SuspensedView>
           }
         />

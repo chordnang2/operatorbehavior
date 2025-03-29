@@ -4,6 +4,7 @@ import Handsontable from 'handsontable'
 import axios from 'axios'
 import moment from 'moment'
 import {useSelector} from 'react-redux'
+import {API_ENDPOINTS} from '../../../config/api'
 
 function MyHandsontableComponent() {
   const container = React.createRef()
@@ -17,7 +18,7 @@ function MyHandsontableComponent() {
   useEffect(() => {
     // Fetch data from the API endpoint using Axios
     axios
-      .get(`https://produksi.mandiriservices.biz.id/optbehav/excel/${moment(dateHandson).valueOf()}`)
+      .get(API_ENDPOINTS.excel(moment(dateHandson).valueOf()))
       // .get(`http://localhost:4001/optbehav/excel/${moment(dateHandson).valueOf()}`)
       .then((response) => {
         const formattedData = response.data.data.map((row) => ({

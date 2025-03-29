@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
+import { API_ENDPOINTS } from '../../config/api';
 
 const Uang = () => {
     const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
@@ -27,8 +28,8 @@ const Uang = () => {
         setLoading(true);
         try {
             const [uangResponse, operatorResponse] = await Promise.all([
-                axios.get(`https://produksi.mandiriservices.biz.id/optbehav/uang?bulan=${selectedMonth}`),
-                axios.get(`https://produksi.mandiriservices.biz.id/optbehav/operatorall?bulan=${selectedMonth}`)
+                axios.get(`${API_ENDPOINTS.uang.getAll}?bulan=${selectedMonth}`),
+                axios.get(`${API_ENDPOINTS.operatorAll(selectedMonth)}`)
             ]);
 
             setUangData(uangResponse.data.data);

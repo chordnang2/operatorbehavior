@@ -6,6 +6,7 @@ import {KTIcon} from '../../../helpers'
 import {DefaultTitle} from './page-title/DefaultTitle'
 import {ThemeModeSwitcher} from '../../../partials'
 import axios from 'axios'
+import {API_ENDPOINTS} from '../../../../config/api'
 
 const HeaderToolbar = () => {
   const {classes} = useLayout()
@@ -20,7 +21,7 @@ const HeaderToolbar = () => {
     if (!userNama) {
       const getNama = async () => {
         await axios
-          .post(`https://produksi.mandiriservices.biz.id/optbehav/user/${nikOpt}`)
+          .post(API_ENDPOINTS.user(nikOpt))
           .then((response) => {
             // console.log(response.data.data[0].nama, 'getNama')
             setNamaOpt(response.data.data[0].nama)

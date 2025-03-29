@@ -3,12 +3,14 @@ import {toAbsoluteUrl} from '../../_metronic/helpers'
 import {useEffect, useRef, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 import Swal from 'sweetalert2'
+import {API_ENDPOINTS} from '../../config/api'
 
 function Login() {
   const [nik, setNik] = useState('')
   const [password, setPassword] = useState('')
   const [nama, setNama] = useState('')
   const [safetyMessage, setSafetyMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate()
   const [backgroundImage, setBackgroundImage] = useState('')
@@ -81,7 +83,7 @@ function Login() {
 
   const handleGetNama = async () => {
     await axios
-      .post(`https://produksi.mandiriservices.biz.id/optbehav/user/${nik}`)
+      .post(API_ENDPOINTS.user(nik))
       .then((response) => {
         console.log(response.data.data[0].nama, 'response sukses')
         if (response.data.data) {
@@ -94,46 +96,59 @@ function Login() {
   }
 
   const handleLogin = async () => {
-    await handleGetNama()
+    setLoading(true)
+    
+    try {
+      await handleGetNama()
 
-    const body = {
-      nik: nik,
-      password: password,
-    }
-    await axios
-      .post(`https://produksi.mandiriservices.biz.id/optbehav/login`, body)
-      .then((response) => {
-        // console.log(response.data.user)
-        if (response.data.user && response.data.user === 'admin') {
-          Swal.fire({
-            icon: 'success',
-            title: 'Login Berhasil',
-            timer: 1500,
-          }).then(() => {
-            localStorage.setItem('user', response.data.user)
-            localStorage.setItem('userNama', response.data.user)
-            navigate('/behavior/excel') // Redirect to /login after the success message is closed
-          })
-        } else {
-          Swal.fire({
-            icon: 'success',
-            title: 'Login Berhasil',
-            timer: 1500,
-          }).then(() => {
-            localStorage.setItem('user', nik)
-            localStorage.setItem('userNama', nama)
-            navigate('/behavior/hmtrip')
-          })
-        }
-      })
-      .catch((error) => {
-        console.error('An error occurred:', error)
-        Swal.fire({
-          icon: 'error',
-          title: 'Login Gagal',
-          text: 'Cek nik dan password kembali',
+      const body = {
+        nik: nik,
+        password: password,
+      }
+      await axios
+        .post(API_ENDPOINTS.login, body)
+        .then((response) => {
+          // console.log(response.data.user)
+          if (response.data.user && response.data.user === 'admin') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Login Berhasil',
+              timer: 1500,
+            }).then(() => {
+              localStorage.setItem('user', response.data.user)
+              localStorage.setItem('userNama', response.data.user)
+              navigate('/behavior/excel') // Redirect to /login after the success message is closed
+            })
+          } else {
+            Swal.fire({
+              icon: 'success',
+              title: 'Login Berhasil',
+              timer: 1500,
+            }).then(() => {
+              localStorage.setItem('user', nik)
+              localStorage.setItem('userNama', nama)
+              navigate('/behavior/hmtrip')
+            })
+          }
         })
+        .catch((error) => {
+          console.error('An error occurred:', error)
+          Swal.fire({
+            icon: 'error',
+            title: 'Login Gagal',
+            text: 'Cek nik dan password kembali',
+          })
+        })
+    } catch (error) {
+      console.error('Login error:', error)
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Gagal',
+        text: 'Terjadi kesalahan, silakan coba lagi',
       })
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -278,8 +293,16 @@ function Login() {
                   id='kt_sign_in_submit'
                   className='btn btn-primary'
                   onClick={handleLogin}
+                  disabled={loading}
                 >
-                  Login
+                  {loading ? (
+                    <span>
+                      <span className='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>
+                      <span className='ms-2'>Loading...</span>
+                    </span>
+                  ) : (
+                    'Login'
+                  )}
                 </button>
               </div>
               {/* <div className='text-gray-500 text-center fw-semibold fs-6'>

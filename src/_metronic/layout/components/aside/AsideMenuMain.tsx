@@ -40,14 +40,21 @@ export function AsideMenuMain() {
         <>
           <div className='menu-item'>
             <div className='menu-content pt-8 pb-2'>
-              <span className='menu-section text-muted text-uppercase fs-8 ls-1'>Behavior</span>
+              <span className='menu-section text-dark fw-bolder text-uppercase fs-7 ls-1'>Operator Behavior</span>
             </div>
           </div>
-          <AsideMenuItem to='/behavior/excel' icon='switch' title='Excel Upload' />
-          <AsideMenuItem to='/behavior/komplain' icon='switch' title='Komplain' />
-          <AsideMenuItem to='/behavior/cek' icon='switch' title='Cek' />
-          <AsideMenuItem to='/behavior/optmaincek' icon='switch' title='Opt Main Cek' />
-          <AsideMenuItem to='/uang' icon='switch' title='Uang Operator' />
+          <div className='menu-item mb-1'>
+            <div className='menu-content'>
+              <div className='separator mx-1 my-2 separator-dashed'></div>
+            </div>
+          </div>
+          <AsideMenuItem to='/behavior/excel' title='Excel Upload' fontIcon='bi-upload' />
+          <AsideMenuItem to='/behavior/komplain'title='Komplain' fontIcon='bi-chat-left-text' />
+          <AsideMenuItem to='/behavior/cek' title='Cek' fontIcon='bi-check2-square' />
+          <AsideMenuItem to='/behavior/optmaincek' title='Opt Main Cek' fontIcon='bi-gear' />
+          <AsideMenuItem to='/uang' title='Uang Operator' fontIcon='bi-cash' />
+          <AsideMenuItem to='/pelanggaran' title='Pelanggaran' fontIcon='bi-person-exclamation' />
+          <AsideMenuItem to='/sp' title='SP' fontIcon='bi-file-earmark-text' />
         </>
       )
     } else {
@@ -55,12 +62,15 @@ export function AsideMenuMain() {
         <>
           <div className='menu-item'>
             <div className='menu-content pt-8 pb-2'>
-              <span className='menu-section text-muted text-uppercase fs-8 ls-1'>Menu</span>
+              <span className='menu-section text-dark fw-bolder text-uppercase fs-7 ls-1'>Menu Operator</span>
             </div>
           </div>
-
-          <AsideMenuItem to='/behavior/hmtrip' icon='switch' title='HM TRIP' />
-          {/* <AsideMenuItem to='/behavior/komplainopt' icon='switch' title='Komplainopt'  /> */}
+          <div className='menu-item mb-1'>
+            <div className='menu-content'>
+              <div className='separator mx-1 my-2 separator-dashed'></div>
+            </div>
+          </div>
+          <AsideMenuItem to='/behavior/hmtrip' icon='truck' title='HM TRIP' fontIcon='bi-truck' />
         </>
       )
     }
@@ -78,10 +88,15 @@ export function AsideMenuMain() {
       {menuUser()}
       <div className='menu-item'>
         <div className='menu-content pt-8 pb-2'>
-          <span className='menu-section text-muted text-uppercase fs-8 ls-1'>Akun</span>
+          <span className='menu-section text-dark fw-bolder text-uppercase fs-7 ls-1'>Akun</span>
         </div>
       </div>
-      <AsideMenuItem to='logout' icon='user' title='Logout' />
+      <div className='menu-item mb-1'>
+        <div className='menu-content'>
+          <div className='separator mx-1 my-2 separator-dashed'></div>
+        </div>
+      </div>
+      <AsideMenuItem to='logout' icon='logout' title='Logout' fontIcon='bi-box-arrow-right' />
       {/* SHEAP */}
       {/* <div className='menu-item'>
         <div className='menu-content pt-8 pb-2'>

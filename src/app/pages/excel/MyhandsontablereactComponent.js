@@ -6,6 +6,7 @@ import axios from 'axios'
 import moment from 'moment-timezone'
 import {useSelector} from 'react-redux'
 import './MyhandsontablereactComponent.css'
+import {API_ENDPOINTS} from '../../../config/api'
 
 // register Handsontable's modules
 registerAllModules()
@@ -37,7 +38,7 @@ const MyhandsontablereactComponent = () => {
     // Fetch data from the API endpoint using Axios
     axios
       // .get(`http://localhost:4100/optbehav/excel/${dateHandson.toString()}`)
-      .get(`https://produksi.mandiriservices.biz.id/optbehav/excel/${dateHandson.toString()}`)
+      .get(API_ENDPOINTS.excel(dateHandson.toString()))
       .then((response) => {
         const formattedData = response.data.data.map((row) => ({
           ...row,
@@ -66,7 +67,7 @@ const MyhandsontablereactComponent = () => {
     axios
       .post(
         // `http://localhost:4001/optbehav/excel/create/${dateHandson.toString()}`,
-        `https://produksi.mandiriservices.biz.id/optbehav/excel/create/${dateHandson.toString()}`,
+        API_ENDPOINTS.excelCreate(dateHandson.toString()),
         data,
         {
           headers: {

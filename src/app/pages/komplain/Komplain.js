@@ -4,6 +4,7 @@ import axios from 'axios'
 import moment from 'moment'
 import {toAbsoluteUrl} from '../../../_metronic/helpers'
 import ModalImage from 'react-modal-image'
+import {API_ENDPOINTS} from '../../../config/api'
 
 function Komplain() {
   const [tableData, setTableData] = useState([])
@@ -36,7 +37,7 @@ function Komplain() {
 
   const getKomplain = () => {
     axios
-      .get(`https://produksi.mandiriservices.biz.id/optbehav/komplain`)
+      .get(API_ENDPOINTS.komplain)
       // .get(`http://localhost:4000/optbehav/komplain`)
       .then((response) => {
         const formattedData = response.data.data.map((row) => ({
@@ -84,7 +85,7 @@ function Komplain() {
       }
 
       axios
-        .patch(`https://produksi.mandiriservices.biz.id/optbehav/komplain/balasan/${itemId}`, requestBody)
+        .patch(API_ENDPOINTS.komplainBalasan(itemId), requestBody)
         .then((response) => {
           console.log('Balasan submitted successfully:', response)
           getKomplain()
