@@ -9,7 +9,6 @@ function Login() {
   const [nik, setNik] = useState('')
   const [password, setPassword] = useState('')
   const [nama, setNama] = useState('')
-  const [safetyMessage, setSafetyMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate()
@@ -68,9 +67,52 @@ function Login() {
   ]
 
   useEffect(() => {
-    // Get random safety message when component mounts
-    const randomIndex = Math.floor(Math.random() * safetyMessages.length)
-    setSafetyMessage(safetyMessages[randomIndex])
+    const lastShown = localStorage.getItem('safetyMessageLastShown')
+    const now = new Date().getTime()
+
+    const showSafetyModal = () => {
+      const randomIndex = Math.floor(Math.random() * safetyMessages.length)
+      const message = safetyMessages[randomIndex]
+
+      const pointsHtml = message.points
+        .map(
+          (point) => `
+            <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-check2-circle me-2" style="color: #009ef7;"></i>
+                <span>${point}</span>
+            </div>
+        `
+        )
+        .join('')
+
+      Swal.fire({
+        title: `<div class="d-flex align-items-center">
+                    <div class="safety-icon me-3" style="background-color: #009ef7; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-shield-check text-white fs-4"></i>
+                    </div>
+                    <h5 class="mb-0" style="color: #009ef7;">${message.title}</h5>
+                </div>`,
+        html: `
+            <div class="safety-points text-start" style="background-color: #f1faff; border-radius: 6px; padding: 15px 20px;">
+                ${pointsHtml}
+            </div>
+        `,
+        showCloseButton: true,
+        showConfirmButton: true,
+        confirmButtonText: 'Saya Mengerti',
+        width: '600px',
+        customClass: {
+          title: 'p-0 border-0',
+          htmlContainer: 'p-0 mt-0',
+        },
+      })
+
+      localStorage.setItem('safetyMessageLastShown', now.toString())
+    }
+
+    if (!lastShown || now - parseInt(lastShown) > 24 * 60 * 60 * 1000) {
+      showSafetyModal()
+    }
   }, [])
 
   const handleKeyDown = (event) => {
@@ -192,47 +234,7 @@ function Login() {
         }}
       >
         {/* Safety Message Box */}
-        {safetyMessage && (
-          <div className="safety-message-box mb-5" 
-            style={{
-              border: '1px solid #e4e6ef',
-              borderRadius: '8px',
-              padding: '20px',
-              backgroundColor: '#fff',
-              boxShadow: '0 0 20px rgba(0,0,0,0.05)',
-            }}>
-            <div className="d-flex align-items-center mb-3">
-              <div className="safety-icon me-3"
-                style={{
-                  backgroundColor: '#009ef7',
-                  borderRadius: '50%',
-                  width: '40px',
-                  height: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                <i className="bi bi-shield-check text-white fs-4"></i>
-              </div>
-              <h5 className="mb-0" style={{ color: '#009ef7' }}>
-                {safetyMessage.title}
-              </h5>
-            </div>
-            <div className="safety-points"
-              style={{
-                backgroundColor: '#f1faff',
-                borderRadius: '6px',
-                padding: '15px 20px',
-              }}>
-              {safetyMessage.points.map((point, index) => (
-                <div key={index} className="d-flex align-items-center mb-2">
-                  <i className="bi bi-check2-circle me-2" style={{ color: '#009ef7' }}></i>
-                  <span>{point}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        
         <div className='d-flex flex-center flex-column flex-lg-row-fluid'>
           <div className='w-lg-500px p-10'>
             <form
@@ -251,6 +253,59 @@ function Login() {
                     src={toAbsoluteUrl('/media/login/logomha.png')}
                     className='me-3 w-100 '
                   />
+                </div>
+              </div>
+              <div
+                className='mb-10 bg-light-info p-8 rounded'
+                style={{
+                  border: '1px solid #e4e6ef',
+                  borderRadius: '8px',
+                  padding: '20px',
+                  backgroundColor: '#f1faff',
+                  boxShadow: '0 0 20px rgba(0,0,0,0.05)',
+                  textAlign: 'left',
+                }}
+              >
+                <div className='d-flex align-items-center mb-3'>
+                  <div
+                    className='safety-icon me-3'
+                    style={{
+                      backgroundColor: '#009ef7',
+                      borderRadius: '50%',
+                      width: '40px',
+                      height: '40px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <i className='bi bi-info-circle-fill text-white fs-4'></i>
+                  </div>
+                  <h5 className='mb-0' style={{color: '#009ef7'}}>
+                    Informasi Login
+                  </h5>
+                </div>
+                <div style={{paddingLeft: '10px'}}>
+                  <p className='mb-2'>
+                    <i className='bi bi-person-check-fill me-2' style={{color: '#009ef7'}}></i>
+                    Login menggunakan akun HRIS.
+                  </p>
+                  <p className='mb-2'>
+                    <i className='bi bi-key-fill me-2' style={{color: '#009ef7'}}></i>
+                    Akun default adalah <b>NIK</b> dan password <b>NIK</b>.
+                  </p>
+                  <p className='mb-2'>
+                    <i className='bi bi-exclamation-triangle-fill me-2' style={{color: '#f1416c'}}></i>
+                    <b>PENTING!</b> Password bukan lagi 5 digit terakhir no KTP.
+                  </p>
+                  <p className='mb-2'>
+                    <i className='bi bi-shield-lock-fill me-2' style={{color: '#009ef7'}}></i>
+                    Untuk mengubah, lupa atau reset password, install aplikasi HRIS.
+                  </p>
+                  <p className='mb-0'>
+                    <i className='bi bi-headset me-2' style={{color: '#009ef7'}}></i>
+                    Hubungi MPP atau CCR (Muhajir atau Rasyid) untuk bantuan.
+                  </p>
                 </div>
               </div>
               <div className='fv-row mb-8'>
@@ -272,7 +327,7 @@ function Login() {
                 <input
                   type='password'
                   autoComplete='on'
-                  placeholder='Masukkan 5 digit terakhir no KTP'
+                  placeholder='Masukkan Password'
                   //   {...formik.getFieldProps('password')}
                   className='form-control bg-transparent'
                   value={password}

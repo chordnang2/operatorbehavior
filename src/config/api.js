@@ -3,14 +3,17 @@ const isLocalDevelopment = false;
 
 // Base URLs
 const PRODUCTION_BASE_URL = 'https://produksi.mandiriservices.biz.id';
-const LOCAL_BASE_URL = 'http://localhost:4100'; // Update this with your local server port
+const LOCAL_BASE_URL = 'http://localhost:4000'; // Update this with your local server port
+const PRODUCTION_HR_BASE_URL = 'https://hr.mandiriservices.biz.id/hris';
+const LOCAL_HR_BASE_URL = 'http://localhost:4001'; // Update this with your local HR server port
 
 // Select the base URL based on the environment
 export const API_BASE_URL = isLocalDevelopment ? LOCAL_BASE_URL : PRODUCTION_BASE_URL;
+export const API_HR_BASE_URL = isLocalDevelopment ? LOCAL_HR_BASE_URL : PRODUCTION_HR_BASE_URL;
 
 export const API_ENDPOINTS = {
     // User endpoints
-    login: `${API_BASE_URL}/optbehav/login`,
+    login: `${API_HR_BASE_URL}/loginoptbehav`,
     user: (nikOpt) => `${API_BASE_URL}/optbehav/user/${nikOpt}`,
     
     // Main data endpoints
