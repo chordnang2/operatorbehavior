@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HM Trip - Operator Behavior</title>
+  <link rel="icon" href="/favicon.ico">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f6f8ff; margin: 0; }
+    .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 32px 24px; }
+    h2 { color: #009ef7; margin-bottom: 18px; }
+    .filter-bar { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .filter-bar label { font-weight: 600; color: #181c32; }
+    .filter-bar input[type="date"] { padding: 6px 10px; border: 1px solid #e4e6ef; border-radius: 6px; }
+    .table-responsive { width: 100%; overflow-x: auto; }
+    table { min-width: 600px; width: 100%; border-collapse: collapse; margin-top: 18px; background: #f9fafe; }
+    th, td { border: 1px solid #e4e6ef; padding: 8px 10px; text-align: left; }
+    th { background: #f1faff; color: #009ef7; }
+    @media (max-width: 700px) {
+      .container { padding: 12px 2vw; }
+      table { font-size: 0.97rem; }
+      th, td { padding: 6px 6px; }
+    }
+    .loading { text-align: center; color: #009ef7; margin: 24px 0; }
+    .error { color: #f1416c; text-align: center; margin: 18px 0; }
+    .safety-box { background: #f1faff; border: 1px solid #e4e6ef; border-radius: 8px; padding: 16px; margin-bottom: 18px; font-size: 0.98rem; color: #181c32; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="margin-bottom:18px;">
+      <h2 style="margin-bottom:6px;">HM Trip</h2>
+      <div style="color:#5e6278;font-size:1.05rem;">Pantau produktivitas harian unit hauling Anda, lengkap dengan rekap HM, Rit, dan KM. Pastikan selalu mematuhi prosedur keselamatan kerja!</div>
+    </div>
+    <div class="safety-box" id="safetyBox"></div>
+    <div id="periode" style="margin-bottom:12px;color:#009ef7;font-weight:600;display:none;"></div>
+    <div class="filter-bar">
+      <label for="date">Tanggal:</label>
+      <input type="date" id="date" name="date">
+      <button id="refreshBtn">Refresh</button>
+    </div>
+    <div id="summary" style="display:none; margin-bottom:18px;">
+      <div style="display:flex; gap:18px; flex-wrap:wrap; justify-content:space-between;">
+        <div style="background:#f1faff;border-radius:8px;padding:16px 24px;min-width:120px;text-align:center;box-shadow:0 2px 8px rgba(0,158,247,0.07);">
+          <div style="color:#5e6278;font-size:0.95rem;">Total HM</div>
+          <div id="sumHm" style="color:#009ef7;font-weight:bold;font-size:1.6rem;">0</div>
+        </div>
+        <div style="background:#f1faff;border-radius:8px;padding:16px 24px;min-width:120px;text-align:center;box-shadow:0 2px 8px rgba(0,158,247,0.07);">
+          <div style="color:#5e6278;font-size:0.95rem;">Total Rit</div>
+          <div id="sumRit" style="color:#009ef7;font-weight:bold;font-size:1.6rem;">0</div>
+        </div>
+        <div style="background:#f1faff;border-radius:8px;padding:16px 24px;min-width:120px;text-align:center;box-shadow:0 2px 8px rgba(0,158,247,0.07);">
+          <div style="color:#5e6278;font-size:0.95rem;">Total KM</div>
+          <div id="sumKm" style="color:#009ef7;font-weight:bold;font-size:1.6rem;">0</div>
+        </div>
+      </div>
+    </div>
+    <div id="loading" class="loading" style="display:none;">Loading data...</div>
+    <div id="error" class="error" style="display:none;"></div>
+    <div class="table-responsive"><table id="hmtripTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Unit</th>
+          <th>Operator</th>
+          <th>HM</th>
+          <th>Rit</th>
+          <th>KM</th>
+          <th>Lokasi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table></div>
+    <div id="senyiurSection" style="display:none; margin-top:32px;">
+      <h3 style="color:#009ef7; margin-bottom:8px;">Senyiur</h3>
+      <div id="senyiurList"></div>
+    </div>
+    <div id="muarapahuSection" style="display:none; margin-top:32px;">
+      <h3 style="color:#009ef7; margin-bottom:8px;">Muara Pahu</h3>
+      <div id="muarapahuList"></div>
+    </div>
+  </div>
+  <script>
+    // Safety messages (ringkas dari versi React)
+    const safetyMessages = [
+      {
+        title: "Patuhi Aturan Kecepatan dan Rambu Lalu Lintas di Jalur Hauling",
+        points: [
+          "Selalu berkendara sesuai batas kecepatan yang ditentukan di area tambang.",
+          "Perhatikan dan patuhi semua rambu-rambu di jalur hauling batubara.",
+          "Jaga jarak aman minimal 50 meter dengan unit hauling lain di depan."
+        ]
+      },
+      {
+        title: "Periksa Kendaraan Hauling Sebelum Beroperasi (Pre-Start Check)",
+        points: [
+          "Pastikan rem, lampu, klakson, dan sistem hidrolik dump truck berfungsi dengan baik.",
+          "Periksa tekanan ban dan ketebalan tapak untuk mencegah risiko tergelincir saat mengangkut beban.",
+          "Laporkan jika ada kerusakan atau potensi bahaya pada unit hauling sebelum mengoperasikan."
+        ]
+      },
+      {
+        title: "Hindari Distraksi Saat Mengemudi Unit Hauling",
+        points: [
+          "Jangan menggunakan ponsel atau perangkat lain saat mengoperasikan dump truck.",
+          "Fokus penuh pada kondisi jalan tambang dan lingkungan sekitar.",
+          "Gunakan komunikasi radio hanya untuk keperluan operasional hauling yang mendesak."
+        ]
+      },
+      {
+        title: "Waspada terhadap Kondisi Jalan Hauling",
+        points: [
+          "Perhatikan jalan berlubang, area licin setelah hujan, dan tanjakan/turunan curam di jalur hauling.",
+          "Jangan berkendara terlalu dekat dengan tepi jalan tambang yang rawan longsor.",
+          "Sesuaikan kecepatan dengan kondisi cuaca dan beban batubara yang diangkut."
+        ]
+      },
+      {
+        title: "Gunakan Alat Pelindung Diri (APD) Operator Hauling yang Lengkap",
+        points: [
+          "Wajib menggunakan helm safety, sepatu safety, rompi reflektif, dan kacamata pelindung.",
+          "Pastikan APD dalam kondisi baik dan sesuai standar keselamatan tambang."
+        ]
+      },
+      {
+        title: "Hindari Mengemudi Unit Hauling dalam Keadaan Tidak Fit",
+        points: [
+          "Jangan mengoperasikan unit hauling jika kelelahan atau dalam pengaruh obat-obatan yang menyebabkan kantuk.",
+          "Laporkan ke supervisor tambang jika merasa tidak fit untuk mengoperasikan dump truck."
+        ]
+      },
+      {
+        title: "Berkomunikasi dan Berkoordinasi dengan Tim Hauling",
+        points: [
+          "Gunakan radio komunikasi dengan baik untuk koordinasi dengan excavator, dispatcher, dan operator hauling lainnya.",
+          "Beri tahu lokasi dan kondisi kendaraan jika terjadi kendala di jalur hauling."
+        ]
+      },
+      {
+        title: "Patuhi Prosedur Loading dan Dumping yang Aman",
+        points: [
+          "Pastikan posisi unit hauling sudah tepat saat proses loading batubara dari excavator.",
+          "Jaga kestabilan unit saat dumping batubara dan perhatikan area sekitar titik dumping."
+        ]
+      },
+      {
+        title: "Perhatikan Distribusi Beban Batubara",
+        points: [
+          "Pastikan beban batubara terdistribusi merata pada bak dump truck.",
+          "Jangan melebihi kapasitas maksimum angkut unit untuk mencegah kecelakaan dan kerusakan jalan hauling."
+        ]
+      },
+      {
+        title: "Waspada Kondisi Ekstrem pada Jalur Hauling",
+        points: [
+          "Kurangi kecepatan saat melintasi area berdebu tinggi dan gunakan lampu hazard.",
+          "Perhatikan stabilitas tanah terutama setelah hujan deras di area tambang."
+        ]
+      }
+    ];
+    function showRandomSafety() {
+      const box = document.getElementById('safetyBox');
+      const msg = safetyMessages[Math.floor(Math.random()*safetyMessages.length)];
+      box.innerHTML = `<b style='color:#009ef7;'>${msg.title}</b><ul style='margin:8px 0 0 18px;'>${msg.points.map(p=>`<li>${p}</li>`).join('')}</ul>`;
+    }
+    showRandomSafety();
+
+    // Date filter
+    const dateInput = document.getElementById('date');
+    const today = new Date();
+    dateInput.value = today.toISOString().slice(0,10);
+
+
+    // Debug: tampilkan body POST yang akan dikirim
+    const debugBody = document.createElement('div');
+    debugBody.id = 'debugBody';
+    debugBody.style = 'margin:8px 0 18px 0; color:#5e6278; font-size:0.98rem;';
+    document.querySelector('.filter-bar').after(debugBody);
+
+    document.getElementById('refreshBtn').onclick = fetchHmTrip;
+    dateInput.onchange = fetchHmTrip;
+
+    function showLoading(show) {
+      document.getElementById('loading').style.display = show ? '' : 'none';
+    }
+    function showError(msg) {
+      const el = document.getElementById('error');
+      el.textContent = msg;
+      el.style.display = msg ? '' : 'none';
+    }
+    function showTable(show) {
+      document.getElementById('hmtripTable').style.display = show ? '' : 'none';
+    }
+    async function fetchHmTrip() {
+      showLoading(true);
+      showError('');
+      showTable(false);
+      document.getElementById('periode').style.display = 'none';
+      document.getElementById('senyiurSection').style.display = 'none';
+      document.getElementById('muarapahuSection').style.display = 'none';
+      const date = dateInput.value;
+      let nik = localStorage.getItem('user');
+      // Jika user di localStorage berupa JSON, ambil nik dari objek
+      try {
+        const userObj = JSON.parse(nik);
+        if (userObj && userObj.nik) nik = userObj.nik;
+      } catch(e) {}
+      const body = { bulan: date, nik };
+      // Tampilkan body POST untuk debug
+      document.getElementById('debugBody').textContent = 'Body POST: ' + JSON.stringify(body);
+      try {
+        // Fetch data utama HM Trip
+        const res = await fetch('http://localhost:4100/optbehav/hmtrip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok || !data.data || !data.data.dataProduktifitas) throw new Error(data.message || 'Gagal load data');
+        renderTable(data.data.dataProduktifitas);
+        // Tampilkan periode jika ada
+        if (data.data.dateStart && data.data.dateEnd) {
+          document.getElementById('periode').textContent = `Periode: ${data.data.dateStart} s/d ${data.data.dateEnd}`;
+          document.getElementById('periode').style.display = '';
+        }
+        showTable(true);
+        // Fetch data Senyiur & Muara Pahu
+        const resTable = await fetch('http://localhost:4100/optbehav/table', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const dataTable = await resTable.json();
+        if (resTable.ok && dataTable.data) {
+          if (Array.isArray(dataTable.data.hmTripSenyiur) && dataTable.data.hmTripSenyiur.length > 0) {
+            renderTableOptSenyiur(dataTable.data.hmTripSenyiur);
+            document.getElementById('senyiurSection').style.display = '';
+          }
+          if (Array.isArray(dataTable.data.hmTripMp) && dataTable.data.hmTripMp.length > 0) {
+            renderTableOptMuaraPahu(dataTable.data.hmTripMp);
+            document.getElementById('muarapahuSection').style.display = '';
+          }
+        }
+      } catch (err) {
+        showError(err.message || 'Gagal load data');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function renderTableOptSenyiur(rows) {
+      const list = document.getElementById('senyiurList');
+      list.innerHTML = '';
+      const flatRows = Array.isArray(rows[0]) ? rows.flat() : rows;
+      const group = {};
+      flatRows.forEach(row => {
+        const tgl = row.datePayroll || '-';
+        if (!group[tgl]) group[tgl] = [];
+        group[tgl].push(row);
+      });
+      Object.keys(group).sort().forEach(tgl => {
+        if (!group[tgl] || group[tgl].length === 0) return;
+        // Cek jika semua baris pada tanggal tsb kosong (unit/operator/hm/rit/km/lokasi kosong/0)
+        const allEmpty = group[tgl].every(row => {
+          const unit = row.unit || row.unitNo || '';
+          const operator = row.operator || row.nama || '';
+          const hm = row.sumHm ?? row.hmDriver ?? 0;
+          const rit = row.sumRit ?? row.akumRit ?? 0;
+          const km = row.sumKm ?? row.kmDriver ?? 0;
+          const lokasi = row.lokasi || '';
+          return !unit && !operator && !lokasi && Number(hm) === 0 && Number(rit) === 0 && Number(km) === 0;
+        });
+        if (allEmpty) {
+          list.innerHTML += `<div style=\"background:#e3f6ff;color:#009ef7;font-weight:600;padding:7px 10px 5px 10px;margin:12px 0 4px 0;border-radius:6px;\">Tanggal: ${tgl} -&gt; kosong</div>`;
+        } else {
+          list.innerHTML += `<div style=\"background:#e3f6ff;color:#009ef7;font-weight:600;padding:7px 10px 5px 10px;margin:12px 0 4px 0;border-radius:6px;\">Tanggal: ${tgl}</div>`;
+          group[tgl].forEach(row => {
+            const unit = row.unit || row.unitNo || '';
+            const operator = row.operator || row.nama || '';
+            const hm = row.sumHm ?? row.hmDriver ?? 0;
+            const rit = row.sumRit ?? row.akumRit ?? 0;
+            const km = row.sumKm ?? row.kmDriver ?? 0;
+            const lokasi = row.lokasi || '';
+            // Hanya render baris jika ada data berarti
+            if (unit || operator || lokasi || Number(hm) !== 0 || Number(rit) !== 0 || Number(km) !== 0) {
+              list.innerHTML += `<div style=\"background:#f9fafe;border:1px solid #e4e6ef;border-radius:7px;padding:10px 12px;margin-bottom:8px;\">\n` +
+                `<div><b>Unit:</b> ${unit}</div>\n` +
+                `<div><b>Operator:</b> ${operator}</div>\n` +
+                `<div><b>HM:</b> ${hm}</div>\n` +
+                `<div><b>Rit:</b> ${rit}</div>\n` +
+                `<div><b>KM:</b> ${km}</div>\n` +
+                `<div><b>Lokasi:</b> ${lokasi}</div>\n` +
+              `</div>`;
+            }
+          });
+        }
+      });
+    }
+
+    function renderTableOptMuaraPahu(rows) {
+      const list = document.getElementById('muarapahuList');
+      list.innerHTML = '';
+      const flatRows = Array.isArray(rows[0]) ? rows.flat() : rows;
+      const group = {};
+      flatRows.forEach(row => {
+        const tgl = row.datePayroll || '-';
+        if (!group[tgl]) group[tgl] = [];
+        group[tgl].push(row);
+      });
+      Object.keys(group).sort().forEach(tgl => {
+        if (!group[tgl] || group[tgl].length === 0) return;
+        const allEmpty = group[tgl].every(row => {
+          const unit = row.unit || row.unitNo || '';
+          const operator = row.operator || row.nama || '';
+          const hm = row.sumHm ?? row.hmDriver ?? 0;
+          const rit = row.sumRit ?? row.akumRit ?? 0;
+          const km = row.sumKm ?? row.kmDriver ?? 0;
+          const lokasi = row.lokasi || '';
+          return !unit && !operator && !lokasi && Number(hm) === 0 && Number(rit) === 0 && Number(km) === 0;
+        });
+        if (allEmpty) {
+          list.innerHTML += `<div style=\"background:#e3f6ff;color:#009ef7;font-weight:600;padding:7px 10px 5px 10px;margin:12px 0 4px 0;border-radius:6px;\">Tanggal: ${tgl} -&gt; kosong</div>`;
+        } else {
+          list.innerHTML += `<div style=\"background:#e3f6ff;color:#009ef7;font-weight:600;padding:7px 10px 5px 10px;margin:12px 0 4px 0;border-radius:6px;\">Tanggal: ${tgl}</div>`;
+          group[tgl].forEach(row => {
+            const unit = row.unit || row.unitNo || '';
+            const operator = row.operator || row.nama || '';
+            const hm = row.sumHm ?? row.hmDriver ?? 0;
+            const rit = row.sumRit ?? row.akumRit ?? 0;
+            const km = row.sumKm ?? row.kmDriver ?? 0;
+            const lokasi = row.lokasi || '';
+            if (unit || operator || lokasi || Number(hm) !== 0 || Number(rit) !== 0 || Number(km) !== 0) {
+              list.innerHTML += `<div style=\"background:#f9fafe;border:1px solid #e4e6ef;border-radius:7px;padding:10px 12px;margin-bottom:8px;\">\n` +
+                `<div><b>Unit:</b> ${unit}</div>\n` +
+                `<div><b>Operator:</b> ${operator}</div>\n` +
+                `<div><b>HM:</b> ${hm}</div>\n` +
+                `<div><b>Rit:</b> ${rit}</div>\n` +
+                `<div><b>KM:</b> ${km}</div>\n` +
+                `<div><b>Lokasi:</b> ${lokasi}</div>\n` +
+              `</div>`;
+            }
+          });
+        }
+      });
+    }
+    function renderTable(rows) {
+      const tbody = document.querySelector('#hmtripTable tbody');
+      tbody.innerHTML = '';
+      let totalHm = 0, totalRit = 0, totalKm = 0;
+      if (!rows || !rows.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Tidak ada data</td></tr>';
+        document.getElementById('summary').style.display = 'none';
+        return;
+      }
+      rows.forEach(row => {
+        totalHm += Number(row.sumHm) || 0;
+        totalRit += Number(row.sumRit) || 0;
+        totalKm += Number(row.sumKm) || 0;
+        tbody.innerHTML += `<tr>
+          <td>${row.unit || ''}</td>
+          <td>${row.operator || ''}</td>
+          <td>${row.sumHm || 0}</td>
+          <td>${row.sumRit || 0}</td>
+          <td>${row.sumKm || 0}</td>
+          <td>${row.lokasi || ''}</td>
+        </tr>`;
+      });
+      document.getElementById('sumHm').textContent = totalHm.toLocaleString('id-ID');
+      document.getElementById('sumRit').textContent = totalRit.toLocaleString('id-ID');
+      document.getElementById('sumKm').textContent = totalKm.toLocaleString('id-ID');
+      document.getElementById('summary').style.display = '';
+    }
+    // Load data pertama kali
+    fetchHmTrip();
+  </script>
+</body>
+</html>

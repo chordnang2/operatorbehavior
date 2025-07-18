@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Operator Behavior</title>
+  <link rel="icon" href="/favicon.ico">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f1faff; margin: 0; }
+    .login-container { max-width: 400px; margin: 60px auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 32px 24px; }
+    .login-title { text-align: center; color: #009ef7; margin-bottom: 24px; }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; margin-bottom: 6px; color: #181c32; font-weight: 600; }
+    input[type="text"], input[type="password"] { width: 100%; padding: 10px; border: 1px solid #e4e6ef; border-radius: 6px; font-size: 1rem; }
+    button { width: 100%; background: #009ef7; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    button:disabled { background: #b5e3fa; }
+    .info-box { background: #f1faff; border: 1px solid #e4e6ef; border-radius: 8px; padding: 16px; margin-bottom: 18px; font-size: 0.95rem; color: #181c32; }
+    .alert { color: #f1416c; margin-bottom: 12px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2 class="login-title">Login</h2>
+    <div class="info-box">
+      <b>Informasi Login:</b><br>
+      Login menggunakan akun HRIS.<br>
+      Akun default adalah <b>NIK</b> dan password <b>NIK</b>.<br>
+      <span style="color:#f1416c"><b>PENTING!</b> Password bukan lagi 5 digit terakhir no KTP.</span><br>
+      Untuk reset password, install aplikasi HRIS.<br>
+      Hubungi MPP/CCR untuk bantuan.
+    </div>
+    <div id="alert" class="alert" style="display:none;"></div>
+    <form id="loginForm" autocomplete="on">
+      <div class="form-group">
+        <label for="nik">NIK</label>
+        <input type="text" id="nik" name="nik" required autofocus>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <button type="submit" id="loginBtn">Login</button>
+    </form>
+  </div>
+  <script>
+    const API_BASE = '/api'; // Ganti jika endpoint berbeda
+    const loginForm = document.getElementById('loginForm');
+    const alertBox = document.getElementById('alert');
+    const loginBtn = document.getElementById('loginBtn');
+
+    loginForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      alertBox.style.display = 'none';
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Loading...';
+      const nik = document.getElementById('nik').value.trim();
+      const password = document.getElementById('password').value;
+      try {
+        // Ganti URL sesuai API Anda
+        const res = await fetch('https://api.hrtabang.mha.co.id/hris/loginoptbehav', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nik, password })
+        });
+        const data = await res.json();
+        if ((res.ok && data.user) || (data.success == 1 && data.user)) {
+          localStorage.setItem('user', data.user);
+          // localStorage.setItem('userNama', data.userNama || nik); // opsional, jika ada
+          if (data.user === 'admin') {
+            window.location.href = '/behavior/excel.html';
+          } else {
+            window.location.href = '/behavior/hmtrip.html';
+          }
+        } else {
+          alertBox.textContent = data.message || 'Login gagal. Cek NIK dan password.';
+          alertBox.style.display = 'block';
+        }
+      } catch (err) {
+        alertBox.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+        alertBox.style.display = 'block';
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
+      }
+    });
+  </script>
+</body>
+</html>

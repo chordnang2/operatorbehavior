@@ -2,9 +2,10 @@
 const isLocalDevelopment = false;
 
 // Base URLs
-const PRODUCTION_BASE_URL = 'https://produksi.mandiriservices.biz.id';
+// const PRODUCTION_BASE_URL = 'https://produksi.mandiriservices.biz.id';
+const PRODUCTION_BASE_URL = 'http://localhost:4100';
 const LOCAL_BASE_URL = 'http://localhost:4000'; // Update this with your local server port
-const PRODUCTION_HR_BASE_URL = 'https://hr.mandiriservices.biz.id/hris';
+const PRODUCTION_HR_BASE_URL = 'https://api.hrtabang.mha.co.id/hris';
 const LOCAL_HR_BASE_URL = 'http://localhost:4001'; // Update this with your local HR server port
 
 // Select the base URL based on the environment
